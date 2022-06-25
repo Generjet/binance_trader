@@ -15,7 +15,20 @@ client = Client(api_key, api_secret)
 
 # минутын дата авах
 def getMinuteData(symbol):
-    df = pd.DataFrame(client.get_historical_klines(symbol,'1m','40m UTC'))
+    #  Хэрэв timeout гэх мэт алдаа гарвал
+    try:
+        df = pd.DataFrame(client.get_historical_klines(symbol,'1m','40m UTC'))
+    except:
+        sleep(60)
+        df = pd.DataFrame(client.get_historical_klines(symbol,'1m','40m UTC'))
+    #  Хэрэв timeout гэх мэт алдаа гарвал
+    # try:
+    #     df = pd.DataFrame(client.get_historical_klines(symbol,'1m','40m UTC'))
+    # except BinanceAPIException as e:
+    #     print(e)
+    #     sleep(60)
+    #     df = pd.DataFrame(client.get_historical_klines(symbol,'1m','40m UTC'))
+    
     # get only first 6 columns: time, open, close, high, low, VOLUME
     df = df.iloc[:,:6]
     df.columns = ['Time', 'Open', 'High','Low','Close', 'VOLUME']
