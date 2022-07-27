@@ -1,3 +1,4 @@
+from curses import window
 from binance.spot import Spot
 import os
 from matplotlib.pyplot import get
@@ -40,5 +41,19 @@ def getData(symbol):
     frame = frame.astype(float)
     return frame
 
-s = getData(symbol)
-print(s)
+df = getData(symbol)
+print(df)
+
+# === 3 === technical indicator
+def indicators(df):
+    df['SMA_200'] = ta.trend.sma_indicator(df.Close, window=200)
+    df['stochrsi_k'] = ta.momentum.stochrsi_k(df.Close, window=10)
+    df.dropna(inplace=True)
+    df['Buy'] = (df.Close > df.SMA_200) & (df.stochrsi_k < 0.05)
+    return df
+
+indicated_data = indicators(df)
+print(indicated_data)
+
+# === continue ===> 
+# ==== https://www.youtube.com/watch?v=VZQg4KSmpQU&list=TLPQMjYwNzIwMjKJH6nEbJ9pcw&index=3 
