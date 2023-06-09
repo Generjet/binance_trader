@@ -4,8 +4,8 @@ import ta
 
 client = Spot()
 # GENERJET API KEY and SECRET
-API_KEY = os.getenv('api_key')
-API_SECRET = os.getenv('api_secret')
+API_KEY = os.getenv('bot_api_key')
+API_SECRET = os.getenv('bot_api_secret')
 print("API_KEY=",API_KEY)
 print("API_SECRET=", API_SECRET)
 
