@@ -120,81 +120,20 @@ def resistance(df):
     # print("Calculating resistance")
     resistances = df[df.High == df.High.rolling(10, center=True).max()].High
     resistance_points = resistances.sort_values(ascending=True).tail(2)
-
-    # resistance coefficients
-    diff_step, lineAscending = direction_and_steps(resistance_points, df)
-    start, end = start_end_ragne(resistance_points)
-    # today = df[(df.index > resistance_points.index[0])]
-    today = df[(df.index > start)]
-
-    x_values = []
-    y_values = []
-
-    min, max = min_max(resistance_points)
-    y = resistance_points[0]
-    # today['resistance'] = np.nan
-
-    if lineAscending == True:
-        y = min
-        for i in today.index:
-            y = y + diff_step
-            y_values.append(y)
-            x_values.append(i)
-            # today.loc[today.index==i, 'resistance'] = y
-            df.loc[df.index==i, 'resistance'] = y
-    elif lineAscending == False:
-        y = max
-        for i in today.index:
-            y = y - diff_step
-            y_values.append(y)
-            x_values.append(i)
-            # today.loc[today.index==i, 'resistance'] = y
-            df.loc[df.index==i, 'resistance'] = y
-
-    print("Resistance ascending", lineAscending)
-    # print("Diff points", diff_step)
-    # # y_values
-# ==== run test ====
-# resistance(df)
+    resistance_mean = resistance_points.max()
+    
+    print("RESISTANCES ", resistances)
+    print("RESISTANCES MEAN P0INT ", resistance_mean)
+    df['resistance'] = resistance_mean
 
 # ======== SUPPORT =======
 def support(df):
     supports = df[df.Low == df.Low.rolling(10, center=True).min()].Low
     support_points = supports.sort_values(ascending=True).head(2)
-    
-    # start_point
-    start, end = start_end_ragne(support_points)
-    support_today = df[(df.index > start)]
-    # support coefficients
-    diff_step, lineAscending = direction_and_steps(support_points, df)
-
-    numrange = len(support_today)
-    x_values = []
-    y_values = []
-
-    min, max = min_max(support_points)
-    y = support_points[0]
-    if lineAscending == True:
-        y = min
-        for i in support_today.index:
-            nth_row = df.loc[df.index == i]
-            print('NTH row ==> ', nth_row)
-            
-            if (nth_row.resistance != np.nan) & (nth_row.support != np.nan) & (nth_row.resistance <= nth_row.support):
-                print('Crossed')
-                y = nth_row.Low - 20
-            else:
-                y = y + diff_step
-            y_values.append(y)
-            x_values.append(i)
-            df.loc[df.index==i, 'support'] = y
-    elif lineAscending == False:
-        y = max
-        for i in support_today.index:
-            y = y - diff_step
-            y_values.append(y)
-            x_values.append(i)
-            df.loc[df.index==i, 'support'] = y
+    support_mean = supports.min()
+    print("SUPPORTS ", supports)
+    print("SUPPORTS MEAN PINT ", support_mean)
+    df['support'] = support_mean
 
 # ===== PLOT and SAVE ======
 # ====== PLOTTING and SAVING =========
@@ -232,7 +171,7 @@ def plot_df(df):
     endDate = df.index[-1].strftime("%Y-%m-%d")
     save_name = startDate + '_to_' + endDate
     save_name
-    plt.savefig('graphs/4h_test_' +save_name+'_signals.jpg')
+    plt.savefig('graphs/SIMPLE_4h_test_' +save_name+'_signals.jpg')
 
 # ===== MACD & RSI & STOCHASTIC OSCILLATOR =======
 def applytechnicals(df):
@@ -247,22 +186,30 @@ def applytechnicals(df):
 
 # ==== LONG and SHORT decide =====
 def long_short_decide(long, short):
-    long['buy_zone'] = long['support'] + 120
-    long['sell_zone'] = long['resistance'] - 120
-    short['buy_zone'] = short['support'] + 60
-    short['sell_zone'] = short['resistance'] - 60
-    # ==== BUY, if it is within channel and not yet overbought ====
+    long['buy_zone'] = long['support'] + long['support']* 0.095 # === Хамгийн чухал нь support&resistance-аас хэдэн хувь зайтай buy&sell zone байх нь чухал нөлөөтэй!!!
+    long['sell_zone'] = long['resistance'] - long['resistance'] * 0.07
+    short['buy_zone'] = short['support'] + short['support'] * 0.095
+    short['sell_zone'] = short['resistance'] - short['resistance'] * 0.07
+    # ==== BUY, if is within channel and not yet overbought ====
     current = short.tail(1)
     longTerm = long.tail(1)
+    print('CURRENT value ',current)
+    print('LONGMAA ', longTerm)
     # === SHORT check ====
-    short['Buy'] = np.where( (short['Close'] > short['ema']) & (short['rsi'] < 30) & ( short['Low'] < short['buy_zone'] ) & ( short['support'] < short['resistance'] ) , short['Close'], np.nan )
+    short['Buy'] = np.where( (short['Close'] > short['ema']) & (short['rsi'] < 45) & ( short['Low'] < short['buy_zone'] ) & ( short['support'] < short['resistance'] ) , short['Close'], np.nan )
     short['Sell'] = np.where( (short['Close'] < short['ema']) & (short['rsi'] > 50) & ( short['High'] > short['sell_zone'] ) & ( short['support'] < short['resistance'] )  , short['Close'], np.nan )
     # === LONG check ====
-    long['Buy'] = np.where( (long['Close'] > long['ema']) & (long['rsi'] < 50) & ( long['Low'] < long['buy_zone'] ) , long['Close'], np.nan )
+    long['Buy'] = np.where( (long['%K'].between(0,30)) & (long['%D'].between(0,30)) & (long['%K'] < long['%D'] ) & (long['rsi'] < 50) & ( long['Low'] < long['buy_zone'] ) , long['Close'], np.nan )
+    # long['Buy'] = np.where( (long['rsi'] < 50) & ( long['Low'] < long['buy_zone'] ) , long['Close'], np.nan )
+    # long['Buy'] = np.where( (long['Close'] > long['ema']) & (long['rsi'] < 50) & ( long['Low'] < long['buy_zone'] ) , long['Close'], np.nan )
+    long['Sell'] = np.where( (long['%K'].between(75,100)) & (long['%D'].between(75,100)) & (long['%K'] > long['%D'] ) & (long['rsi'] > 65) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
+    # long['Sell'] = np.where( (long['rsi'] > 55) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
+    
+    # long['Sell'] = np.where( (long['%D'] > 73) & (long['%K'] > 73) & (long['Close'] < long['ema']) & (long['rsi'] > 55) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
+    # long['Sell'] = np.where( (long['Close'] < long['ema']) & (long['rsi'] > 55) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
     # long['Sell'] = np.where( (long['rsi'] > 50) & ( long['High'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) & (long['%K'].between(60,100)) & (long['%D'].between(60,100)) & (long['%K'] > long['%D'] ) , long['Close'], np.nan )
-    long['Sell'] = np.where( (long['Close'] < long['ema']) & (long['rsi'] > 40) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
 
-    # === LONGTERM ==> Buy, if price goes UP and breaks RESISTANCE or SELL if breaks SUPPORT ===
+    # === Buy, if price goes UP and breaks RESISTANCE or SELL if breaks SUPPORT ===
     signal = 'wait'
     if (current['Close'][0] > longTerm['resistance'][0]) & (longTerm['rsi'][0] > 70 ):
         breakout_buy = True
@@ -280,6 +227,7 @@ def long_short_decide(long, short):
         signal = 'buy'
     # return long, short
     return signal
+# =======================================================
 
 # SHORT TERM data
 symbol = 'ETHUSDT'
