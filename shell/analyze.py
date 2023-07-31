@@ -32,89 +32,6 @@ def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
 # return signal to shell
 print("wait")
 
-# === SLOPE, INTERCEPTS and difference STEPS ====
-# 2 argument l avna
-def direction_and_steps(datapoints, df):
-    if datapoints.index[0] > datapoints.index[1]:
-        startIndex = datapoints.index[0]
-        endIndex = datapoints.index[1]
-    else:
-        startIndex = datapoints.index[1]
-        endIndex = datapoints.index[0]
-    a = datapoints.head(1)
-    b = datapoints.tail(1)
-    a_value = a[0]
-    b_value = b[0]
-    ascending = False
-
-# ========================
-    if b.index < a.index:
-        oldIndex = b.index
-        newIndex = a.index
-        if b_value > a_value:
-            max = b_value
-            min = a_value
-            ascending = False
-            print("descending")
-        else:
-            max = a_value
-            min = b_value
-            ascending = True
-            print('ascending')
-    elif b.index > a.index:
-        oldIndex = a.index
-        newIndex = b.index
-        if b_value > a_value:
-            max = b_value
-            min = a_value
-            ascending = True
-            print('ascending')
-        else:
-            max = a_value
-            min = b_value
-            ascending = False
-            print('descending')
-
-    top_diff = max - min
-    # print('difference = ', top_diff)
-    filtered = df[(df.index <= startIndex) & (df.index >= endIndex)]
-    numrange = len(filtered)
-    # print('range =', numrange)
-    diff_step = top_diff/numrange
-    return diff_step, ascending
-# === test ===
-# resistance_points = resistances.sort_values(ascending=False).tail(2)
-
-# diff_step, lineAscending = direction_and_steps(resistance_points)
-# # print('diff = ', diff_step)
-# lineAscending
-
-# ==== RETURN min & max from 2 POINTS ====
-def min_max(datapoints):
-    a = datapoints.head(1)
-    b = datapoints.tail(1)
-    a_value = a[0]
-    b_value = b[0]
-    if b_value > a_value:
-        max = b_value
-        min = a_value
-        print("max= ", max, "min= ", min)
-    else:
-        max = a_value
-        min = b_value
-        print("max= ", max, "min= ", min)
-    return min, max
-
-# ===== EXTREMUM hoorondiin data range easify =====
-def start_end_ragne(datapoints):
-    if datapoints.index[1] > datapoints.index[0]:
-        startIndex = datapoints.index[0]
-        endIndex = datapoints.index[1]
-    else:
-        startIndex = datapoints.index[1]
-        endIndex = datapoints.index[0]
-    return startIndex, endIndex
-
 # === RESISTANCE until NOW ===
 def resistance(df):
     # print("Calculating resistance")
@@ -171,7 +88,7 @@ def plot_df(df):
     endDate = df.index[-1].strftime("%Y-%m-%d")
     save_name = startDate + '_to_' + endDate
     save_name
-    plt.savefig('graphs/SIMPLE_4h_test_' +save_name+'_signals.jpg')
+    plt.savefig('graphs/CLEAN_SIMPLE_4h_test_' +save_name+'_signals.jpg')
 
 # ===== MACD & RSI & STOCHASTIC OSCILLATOR =======
 def applytechnicals(df):
