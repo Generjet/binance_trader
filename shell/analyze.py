@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 import polars as pl
 import datetime
 import csv
+from os.path import exists as file_exists
 
 # GENERJET API KEY and SECRET
 api_key = os.getenv('API_KEY')
@@ -183,7 +184,54 @@ print("SIGNAL =====> ", signal)
 
 
 # ==================================================
-# # ===== UPDATE ROW if "Sell" is confirmed ========
+# ===== INSERT INTO SIGNALS.CSV =========
+now = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+fileName = 'trade_signals.csv'
+
+# === PREPARE signals ROW ====
+newest = hour4.tail(1)
+header = ['date','rsi','%K','%D','macd','support','resistance','buy_zone','sell_zone']
+signalValues  = []
+signalValues.insert(0,now)
+signalValues.insert(1, newest.rsi[0])
+signalValues.insert(2, newest['%K'][0])
+signalValues.insert(3, newest['%D'][0])
+signalValues.insert(4, newest['macd'][0])
+signalValues.insert(5, newest['support'][0])
+signalValues.insert(6, newest['resistance'][0])
+signalValues.insert(7, newest['buy_zone'][0])
+signalValues.insert(8, newest['sell_zone'][0])
+
+def create_signals():
+    with open(fileName, 'w') as f:
+        write = csv.writer(f)
+        write.writerow(header)
+        write.writerow(signalValues)
+        f.close()
+
+def append_signals():
+    with open(fileName, 'a+') as f:
+        f.seek(0) # move read cursor to the start of file
+        # if file is not empty then append '\n'
+        data = f.read(100)
+        if len(data) > 0:
+            f.write("\n")
+        # Append text at the end of file
+        write = csv.writer(f)
+        # write.writerow(header)
+        write.writerow(signalValues)
+        f.close()
+
+# === CHECK if file exists ====
+if file_exists(fileName):
+    print("File bainaa baina: ", fileName)
+    append_signals()
+else:
+    print("File OBSOO, we will create it: ", fileName)
+    create_signals()
+
+
+# ===== UPDATE ROW if "Sell" is confirmed ========
 # def update_csv_data(sell_date, sell_amount, sell_price):
 #     # Specify the path to your CSV file
 #     csv_file_path = "orders.csv"
