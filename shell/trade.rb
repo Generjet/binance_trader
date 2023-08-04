@@ -24,6 +24,8 @@ current_datetime = DateTime.now
 client = Binance::Spot.new(key: ENV["bot_api_key"], secret: ENV["bot_api_secret"])
 # Send a request to query BTCUSDT ticker
 current_price = client.ticker_24hr(symbol: 'ETHUSDT')
+lastPrice = current_price[:lastPrice].to_f
+puts lastPrice
 # Send a request to get account information
 my_account = client.account
 
@@ -43,7 +45,16 @@ end
 
 signals = TradeSignal.all
 puts signals.pluck(:support, :resistance)
+lastSignal = TradeSignal.last
+puts("Buy_zone ", lastSignal.buy_zone)
 
+if lastSignal.buy_zone > lastPrice
+    puts "U can buy"
+elsif lastSignal.sell_zone <lastPrice
+    puts "U can SELL"
+else
+    puts "wait"
+end
 
 # 3. ================== Read Orders ================
 class Orders < ActiveRecord::Base
