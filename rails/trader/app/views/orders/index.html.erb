@@ -1,0 +1,34 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Orders</h1>
+<div id="orders">
+<table class='table' border=1>
+  <thead>
+    <tr>
+      <th>buy_amount</th>
+      <th>buy_price</th>
+      <th>buy_date</th>
+      <th>sell_amount</th>
+      <th>sell_price</th>
+      <th>sell_date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td><%= order.buy_amount %></td>
+        <td><%= order.buy_price %></td>
+        <td><%= order.buy_date %></td>
+        <td><%= order.sell_amount %></td>
+        <td><%= order.sell_price %></td>
+        <td><%= order.sell_date %></td>
+      </tr>
+    <% end %>
+  </tbody>
+
+</table>
+
+</div>
+<%= link_to "New order", new_order_path %>
+
+

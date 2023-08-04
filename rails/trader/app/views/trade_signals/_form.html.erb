@@ -1,0 +1,77 @@
+<%= form_with(model: trade_signal) do |form| %>
+  <% if trade_signal.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(trade_signal.errors.count, "error") %> prohibited this trade_signal from being saved:</h2>
+
+      <ul>
+        <% trade_signal.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :date, style: "display: block" %>
+    <%= form.datetime_field :date %>
+  </div>
+
+  <div>
+    <%= form.label :rsi, style: "display: block" %>
+    <%= form.text_field :rsi %>
+  </div>
+
+  <div>
+    <%= form.label :k, style: "display: block" %>
+    <%= form.text_field :k %>
+  </div>
+
+  <div>
+    <%= form.label :d, style: "display: block" %>
+    <%= form.text_field :d %>
+  </div>
+
+  <div>
+    <%= form.label :macd, style: "display: block" %>
+    <%= form.text_field :macd %>
+  </div>
+
+  <div>
+    <%= form.label :support, style: "display: block" %>
+    <%= form.text_field :support %>
+  </div>
+
+  <div>
+    <%= form.label :resistance, style: "display: block" %>
+    <%= form.text_field :resistance %>
+  </div>
+
+  <div>
+    <%= form.label :buy_zone, style: "display: block" %>
+    <%= form.text_field :buy_zone %>
+  </div>
+
+  <div>
+    <%= form.label :sell_zone, style: "display: block" %>
+    <%= form.text_field :sell_zone %>
+  </div>
+
+  <div>
+    <%= form.label :currency, style: "display: block" %>
+    <%= form.text_field :currency %>
+  </div>
+
+  <div>
+    <%= form.label :bot_signal, style: "display: block" %>
+    <%= form.text_field :bot_signal %>
+  </div>
+
+  <div>
+    <%= form.label :last_close_price, style: "display: block" %>
+    <%= form.text_field :last_close_price %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

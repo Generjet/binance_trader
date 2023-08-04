@@ -5,6 +5,17 @@ require 'sqlite3'
 require 'active_record'
 require 'date'
 
+# === ACTIVE RECORD connection =====
+# curr_date_time = DateTime.now.strftime "%d/%m/%Y  %H:%M:%S"
+current_datetime = DateTime.now
+# ===== establish connection ======
+    ActiveRecord::Base.establish_connection( 
+        :adapter => "sqlite3",
+        :host => "localhost",
+        :database => "../rails/trader/db/development.sqlite3"
+       )
+# =====================
+
 # 1. ============= Create a new client instance. ==============
 # ==== turshiltiih =====
 # client = Binance::Spot.new(base_url: 'https://testnet.binance.vision')
@@ -20,36 +31,37 @@ my_account = client.account
 # 2. ================== Read Signals ======================
 # file = CSV.read("signals.csv")
 # file = CSV.parse(File.read("orders.csv"), headers: true)
-# puts file
+# CSV.foreach('signals.csv', :headers => true) do |row|
+#     puts row['support']
+#     puts row['time_period']
+# end
 
-# id,time_period,date,rsi,stoch,macd,support,resistance,buy_zone,sell_zone
-
-CSV.foreach('signals.csv', :headers => true) do |row|
-    puts row['support']
-    puts row['time_period']
+# === from SQL =====
+class TradeSignal < ActiveRecord::Base
+    self.table_name = 'trade_signals'
 end
 
-# 3. ================== Read Orders ================
-# === GLOBAL variables ====
-# date_time = DateTime.now
-# curr_date_time = date_time.strftime "%d/%m/%Y  %H:%M:%S"
-current_datetime = DateTime.now
-puts current_datetime
+signals = TradeSignal.all
+puts signals.pluck(:support, :resistance)
 
-# ===== establish connection ======
-    ActiveRecord::Base.establish_connection( 
-        :adapter => "sqlite3",
-        :host => "localhost",
-        :database => "../rails/trader/db/development.sqlite3"
-       )
-    # =====================
+
+# 3. ================== Read Orders ================
 class Orders < ActiveRecord::Base
     self.table_name = 'orders'
         # has_many :table_relationship
 end
 
 # ========== query by activerecord =========
+# orders = Orders.all 
+# puts orders.first.buy_date
+# puts orders.pluck(:buy_amount, :buy_date, :buy_price)
+# abort "DEBUG =====> DONE"
 
+
+# 4. ============= Place an order ========================
+# response = client.new_order(symbol: 'ETHUSDT', side: 'SELL', price: 1945, quantity: 0.0294, type: 'LIMIT', timeInForce: 'GTC')
+
+# 5. ============== Update or Insert into Orders =========
 # # === insert ===
 # order = Orders.new
 # order.buy_signal = ARGV[0]
@@ -59,17 +71,3 @@ end
 # order.buy_price = ARGV[4]
 # order.currency = ARGV[5]
 # order.save
-
-# === select ===
-orders = Orders.all 
-puts orders.first.buy_date
-# puts orders.pluck(:buy_amount, :buy_date, :buy_price)
-
-abort "DEBUG =====> DONE"
-
-
-# 4. ============= Place an order ========================
-# response = client.new_order(symbol: 'ETHUSDT', side: 'SELL', price: 1945, quantity: 0.0294, type: 'LIMIT', timeInForce: 'GTC')
-
-# 5. ============== Update or Insert into Orders =========
-

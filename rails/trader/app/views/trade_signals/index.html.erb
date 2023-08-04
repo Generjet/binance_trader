@@ -1,0 +1,48 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Trade signals</h1>
+
+<div id="trade_signals">
+  <table class='table' border=1>
+    <thead>
+      <tr>
+        <th>date</th>
+        <th>rsi</th>
+        <th>%K</th>
+        <th>%D</th>
+        <th>MACD</th>
+        <th>support</th>
+        <th>resistance</th>
+        <th>BUY_ZONE</th>
+        <th>SELL_ZONE</th>
+        <th>CURRENCY</th>
+        <th>SIGNAL</th>
+        <th>LAST PRICE</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @trade_signals.each do |signal| %>
+        <tr>
+          <th><%= signal.date %></th>
+          <th><%= signal.rsi.ceil(2) %></th>
+          <th><%= signal.k.ceil(2) %></th>
+          <th><%= signal.d.ceil(2) %></th>
+          <th><%= signal.macd.ceil(2) %></th>
+          <th><%= signal.support %></th>
+          <th><%= signal.resistance %></th>
+          <th><%= signal.buy_zone.ceil(2) %></th>
+          <th><%= signal.sell_zone.ceil(2) %></th>
+          <th><%= signal.currency %></th>
+          <th><%= signal.bot_signal %></th>
+          <th><%= signal.last_close_price %></th>
+        </tr>
+        <p>
+          <%= link_to "Show this trade signal", signal %>
+        </p>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>
+
+<%= link_to "New trade signal", new_trade_signal_path %>

@@ -1,0 +1,2 @@
+module TradeSignalsHelper
+end

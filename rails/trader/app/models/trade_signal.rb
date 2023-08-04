@@ -1,0 +1,2 @@
+class TradeSignal < ApplicationRecord
+end

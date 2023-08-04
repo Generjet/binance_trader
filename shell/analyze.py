@@ -11,13 +11,15 @@ import plotly.graph_objects as go
 import polars as pl
 import datetime
 import csv
+import sqlite3
 from os.path import exists as file_exists
 
 # GENERJET API KEY and SECRET
 api_key = os.getenv('API_KEY')
 api_secret = os.getenv('API_SECRET')
-
 client = Client(api_key, api_secret)
+# ======== setting overall signal values to variables ====
+currency = 'ETHUSDT'
 
 # ====== get data function ======
 def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
@@ -29,8 +31,6 @@ def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
     frame = frame.astype(float)
     return frame
 
-# print("Hour4", hour4)
-# return signal to shell
 print("wait")
 
 # === RESISTANCE until NOW ===
@@ -143,7 +143,6 @@ def long_short_decide(long, short):
     elif (current['Close'][0] < longTerm['buy_zone'][0]) & (current['Close'][0] > longTerm['support'][0]) & (longTerm['rsi'][0] < 30):
         print("CHANNEL BUY")
         signal = 'buy'
-    # return long, short
     return signal
 # =======================================================
 
@@ -151,35 +150,35 @@ def long_short_decide(long, short):
 symbol = 'ETHUSDT'
 timePeriod = '30m'
 lookback = '60'
-min30 = fetchCryptoData(symbol, timePeriod, lookback )
-min30['resistance'] = np.nan
-min30['support'] = np.nan
-min30['macd'] = np.nan
-min30['rsi'] = np.nan
-min30['%D'] = np.nan
-min30['%K'] = np.nan
+shortTerm = fetchCryptoData(symbol, timePeriod, lookback )
+shortTerm['resistance'] = np.nan
+shortTerm['support'] = np.nan
+shortTerm['macd'] = np.nan
+shortTerm['rsi'] = np.nan
+shortTerm['%D'] = np.nan
+shortTerm['%K'] = np.nan
 
 #LOGN TERM data
 symbol = 'ETHUSDT'
 timePeriod = '4h'
 lookback = '96'
-hour4 = fetchCryptoData(symbol, timePeriod, lookback )
-hour4['resistance'] = np.nan
-hour4['support'] = np.nan
-hour4['macd'] = np.nan
-hour4['rsi'] = np.nan
-hour4['%D'] = np.nan
-hour4['%K'] = np.nan
+longTerm = fetchCryptoData(symbol, timePeriod, lookback )
+longTerm['resistance'] = np.nan
+longTerm['support'] = np.nan
+longTerm['macd'] = np.nan
+longTerm['rsi'] = np.nan
+longTerm['%D'] = np.nan
+longTerm['%K'] = np.nan
 
 # ===== PERFORM ======
-resistance(hour4)
-support(hour4)
-resistance(min30)
-support(min30)
-applytechnicals(hour4)
-applytechnicals(min30)
-signal = long_short_decide(hour4, min30)
-plot_df(hour4)
+resistance(longTerm)
+support(longTerm)
+resistance(shortTerm)
+support(shortTerm)
+applytechnicals(longTerm)
+applytechnicals(shortTerm)
+signal = long_short_decide(longTerm, shortTerm)
+plot_df(longTerm)
 print("SIGNAL =====> ", signal)
 
 
@@ -189,7 +188,20 @@ now = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 fileName = 'trade_signals.csv'
 
 # === PREPARE signals ROW ====
-newest = hour4.tail(1)
+newest = longTerm.tail(1)
+# ======== setting overall signal values to variables ====
+last_close_price = shortTerm.tail(1)['Close'][0]
+rsi = newest['rsi'][0]
+k = newest['%K'][0]
+d = newest['%D'][0]
+macd = newest['macd'][0]
+support = newest['support'][0]
+resistance = newest['resistance'][0]
+buy_zone = newest['buy_zone'][0]
+sell_zone = newest['sell_zone'][0]
+bot_signal = 'buy'
+print('BUY_ZONE ', buy_zone)
+
 header = ['date','rsi','%K','%D','macd','support','resistance','buy_zone','sell_zone']
 signalValues  = []
 signalValues.insert(0,now)
@@ -230,6 +242,20 @@ else:
     print("File OBSOO, we will create it: ", fileName)
     create_signals()
 
+# ===== INSERT into SIGNALS table =====
+if __name__ == "__main__":
+    local_db_path = "../rails/trader/db/development.sqlite3"
+    connection = sqlite3.connect(local_db_path)
+    db_cursor = connection.cursor()
+    new_signal = (now,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,now,now)
+
+    # Insert into database
+    sql = """INSERT INTO trade_signals(date,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,created_at,updated_at)
+             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)"""
+    db_cursor.execute(sql, new_signal)
+
+    connection.commit()
+    connection.close()
 
 # ===== UPDATE ROW if "Sell" is confirmed ========
 # def update_csv_data(sell_date, sell_amount, sell_price):
