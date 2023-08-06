@@ -7,7 +7,7 @@ require 'date'
 
 # === ACTIVE RECORD connection =====
 # curr_date_time = DateTime.now.strftime "%d/%m/%Y  %H:%M:%S"
-current_datetime = DateTime.now
+now = DateTime.now
 # ===== establish connection ======
     ActiveRecord::Base.establish_connection( 
         :adapter => "sqlite3",
@@ -44,16 +44,46 @@ class TradeSignal < ActiveRecord::Base
 end
 
 signals = TradeSignal.all
-puts signals.pluck(:support, :resistance)
 lastSignal = TradeSignal.last
-puts("Buy_zone ", lastSignal.buy_zone)
+# ==== check date for last signals =====
+signalDay = lastSignal.date.strftime "%d"
+nowDay = now.strftime "%d"
+signalMonth = lastSignal.date.strftime "%m"
+nowMonth = now.strftime "%m"
+signalHour = lastSignal.date.strftime "%H"
+nowHour = now.strftime "%H"
+signalMinute = lastSignal.date.strftime "%M"
+nowMinute = now.strftime "%M"
 
-if lastSignal.buy_zone > lastPrice
-    puts "U can buy"
-elsif lastSignal.sell_zone <lastPrice
-    puts "U can SELL"
+if (signalDay != nowDay) && (signalHour != nowHour)
+   abort "Signal Hour: "+signalDay+"d "+signalHour+" differs from Now Hour: "+nowDay+"d "+ nowHour+ "===> exit"
+end
+
+# === Python reference ===
+# long['Buy'] = np.where( (long['%K'].between(0,30)) & (long['%D'].between(0,30)) & (long['%K'] < long['%D'] ) & (long['rsi'] < 50) & ( long['Low'] < long['buy_zone'] ) , long['Close'], np.nan )
+# long['Sell'] = np.where( (long['%K'].between(75,100)) & (long['%D'].between(75,100)) & (long['%K'] > long['%D'] ) & (long['rsi'] > 65) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
+
+
+# ==== check Buy or Sell condition from signals ====
+# === BUY signals ===
+buy_zone = true if lastSignal.buy_zone > lastPrice
+buy_stoch = true if (lastSignal.k < 30) && (lastSignal.d < 30) && (lastSignal.k < lastSignal.d)
+buy_rsi = true if (lastSignal.rsi < 50)
+buy_macd = true if (lastSignal.macd < -15)
+# === SELL signals ===
+sell_zone = true if lastSignal.sell_zone > lastPrice
+sell_stoch = true if (lastSignal.k > 70) && (lastSignal.d > 70) && (lastSignal.k > lastSignal.d)
+sell_rsi = true if (lastSignal.rsi > 65)
+sell_macd = true if (lastSignal.macd > 20)
+
+puts "Now Price:"+lastPrice.to_s+" BuyZone: "+lastSignal.buy_zone.to_s + " SellZone: "+lastSignal.sell_zone.to_s
+
+if buy_zone && buy_stoch && buy_rsi
+    puts "NowPrice:"+lastPrice.to_s+" < BuyZone:"+lastSignal.buy_zone.to_s + " ==> U can buy"
+elsif sell_zone && sell_stoch && sell_rsi
+    puts "NowPrice:"+lastPrice.to_s+" > SellZone:"+lastSignal.sell_zone.to_s + " ==> U can SELL"
 else
-    puts "wait"
+    puts "Now Price:"+lastPrice.to_s+" BuyZone: "+lastSignal.buy_zone.to_s + " SellZone: "+lastSignal.sell_zone.to_s + " ==> WAIT"
 end
 
 # 3. ================== Read Orders ================

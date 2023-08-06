@@ -1,24 +1,33 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Дараах зүйлсийг имплемент хийх:
 
-Things you may want to cover:
+* Channel level үүсгэх бөгөөд хэрэв үнэ level-ээс хэтрээд явбал тухайн level-ийг дууссанд тооцож status=ended болгоно. Энэ үед stop_loss_trade table эхлүүлэх бөгөөд next channel үүсэх процессыг хүлээж ажиглан, тухайн шинэ суваг дотороо хамгийн өндөр цэг буюу таазанд хүрсэн үед нь зарна. Ингэснээр алдагдалтай яваа арилжааг буцаж дээшээ өгсөн ашигаа хийхийг хэт удаан хүлээлгүйгээр хамгийн алдагдал багатайгаар зарж дараачийн савалгаанд ашиг хийнэ.
 
-* Ruby version
+ Харин level дотороо байвал status=started байх бөгөөд энэ үед buy=>sell хослол хийнэ.
 
-* System dependencies
+Buy is allowed if:
+status = started  # шинэ суваг нээгдсэн бөгөөд суваг дотор байгаа гэсэн үг учраас тэр
 
-* Configuration
+Sell is allowed if:
+status = started 
 
-* Database creation
+Харин Stop_Loss trade-ийн хувьд:
+if price goes down below support & orders.sell_date = nil , then  
 
-* Database initialization
 
-* How to run the test suite
+* Micro time period scalping
+5min period => set support and resistance.( can be set manually and automatically by python)
+bounce trade within this channel
 
-* Services (job queues, cache servers, search engines, etc.)
+* orders belongs_to channel level . 
+orders belongs_to signals . Because it has buy and sell, thus 2 signals must have
+channel_level:
+1. id
+2. support
+3. resistance
 
-* Deployment instructions
+orders:
+1. signals_id
+2. channel_id
 
-* ...
