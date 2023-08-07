@@ -48,12 +48,12 @@ lastSignal = TradeSignal.last
 # ==== check date for last signals =====
 # ==== time comparison ====
 last1hour = (now - 1.hours).strftime "%Y-%m-%d  %H:%M:%S"
-last5mins = now - 5.minutes
+last5mins = (now - 7.minutes).strftime "%Y-%m-%d  %H:%M:%S"
 now = DateTime.now.strftime "%Y-%m-%d  %H:%M:%S"
 
-withinRange = lastSignal.date.between?(last1hour, now)
+withinRange = lastSignal.date.between?(last5mins, now)
 puts "WITHIN RANGE -> "+withinRange.to_s
-puts last1hour.to_s+" = Last hour "
+puts last5mins.to_s+" = Last hour "
 puts now.to_s + "= now"
 puts lastSignal.date.to_s + " = lastSignal.date "
 
