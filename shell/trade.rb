@@ -62,9 +62,7 @@ unless withinRange
 end
 
 # === Python reference ===
-# long['Buy'] = np.where( (long['%K'].between(0,30)) & (long['%D'].between(0,30)) & (long['%K'] < long['%D'] ) & (long['rsi'] < 50) & ( long['Low'] < long['buy_zone'] ) , long['Close'], np.nan )
 # long['Sell'] = np.where( (long['%K'].between(75,100)) & (long['%D'].between(75,100)) & (long['%K'] > long['%D'] ) & (long['rsi'] > 65) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
-
 
 # ==== check Buy or Sell condition from signals ====
 # === BUY signals ===
@@ -73,7 +71,7 @@ buy_stoch = true if (lastSignal.k < 30) && (lastSignal.d < 30) && (lastSignal.k 
 buy_rsi = true if (lastSignal.rsi < 50)
 buy_macd = true if (lastSignal.macd < -15)
 # === SELL signals ===
-sell_zone = true if lastSignal.sell_zone > lastPrice
+sell_zone = true if lastSignal.sell_zone < lastPrice
 sell_stoch = true if (lastSignal.k > 70) && (lastSignal.d > 70) && (lastSignal.k > lastSignal.d)
 sell_rsi = true if (lastSignal.rsi > 65)
 sell_macd = true if (lastSignal.macd > 20)
