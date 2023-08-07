@@ -6,7 +6,7 @@ require 'active_record'
 require 'date'
 
 # === ACTIVE RECORD connection =====
-# curr_date_time = DateTime.now.strftime "%d/%m/%Y  %H:%M:%S"
+# now = DateTime.now.strftime "%Y-%m-%d  %H:%M:%S"
 now = DateTime.now
 # ===== establish connection ======
     ActiveRecord::Base.establish_connection( 
@@ -46,17 +46,19 @@ end
 signals = TradeSignal.all
 lastSignal = TradeSignal.last
 # ==== check date for last signals =====
-signalDay = lastSignal.date.strftime "%d"
-nowDay = now.strftime "%d"
-signalMonth = lastSignal.date.strftime "%m"
-nowMonth = now.strftime "%m"
-signalHour = lastSignal.date.strftime "%H"
-nowHour = now.strftime "%H"
-signalMinute = lastSignal.date.strftime "%M"
-nowMinute = now.strftime "%M"
+# ==== time comparison ====
+last1hour = (now - 1.hours).strftime "%Y-%m-%d  %H:%M:%S"
+last5mins = now - 5.minutes
+now = DateTime.now.strftime "%Y-%m-%d  %H:%M:%S"
 
-if (signalDay != nowDay) && (signalHour != nowHour)
-   abort "Signal Hour: "+signalDay+"d "+signalHour+" differs from Now Hour: "+nowDay+"d "+ nowHour+ "===> exit"
+withinRange = lastSignal.date.between?(last1hour, now)
+puts "WITHIN RANGE -> "+withinRange.to_s
+puts last1hour.to_s+" = Last hour "
+puts now.to_s + "= now"
+puts lastSignal.date.to_s + " = lastSignal.date "
+
+unless withinRange
+    abort "Signal Hour Differs: ===> exit"
 end
 
 # === Python reference ===
