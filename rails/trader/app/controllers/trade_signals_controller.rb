@@ -65,6 +65,6 @@ class TradeSignalsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def trade_signal_params
-      params.require(:trade_signal).permit(:date, :rsi, :k, :d, :macd, :support, :resistance, :buy_zone, :sell_zone, :currency, :bot_signal, :last_close_price)
+      params.require(:trade_signal).permit(:period, :date, :rsi, :k, :d, :macd, :support, :resistance, :buy_zone, :sell_zone, :currency, :bot_signal, :last_close_price)
     end
 end

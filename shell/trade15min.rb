@@ -5,9 +5,15 @@ require 'sqlite3'
 require 'active_record'
 require 'date'
 
+# ==== GET arguments from command line ====
+period = ARGV[0]
+puts "available period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M"
+puts 'GOT PERIOD VARIABLE from COMMAND LINE: => '+period
+
 # === ACTIVE RECORD connection =====
 # now = DateTime.now.strftime "%Y-%m-%d  %H:%M:%S"
 now = DateTime.now
+# period = '15min'
 # ===== establish connection ======
     ActiveRecord::Base.establish_connection( 
         :adapter => "sqlite3",
@@ -18,33 +24,33 @@ now = DateTime.now
 
 # 1. ============= Create a new client instance. ==============
 # ==== turshiltiih =====
-# client = Binance::Spot.new(base_url: 'https://testnet.binance.vision')
-# puts client.time
+client = Binance::Spot.new(base_url: 'https://testnet.binance.vision')
+puts client.time
 # ==== jinhene =======
-client = Binance::Spot.new(key: ENV["bot_api_key"], secret: ENV["bot_api_secret"])
+# client = Binance::Spot.new(key: ENV["bot_api_key"], secret: ENV["bot_api_secret"])
 # Send a request to query BTCUSDT ticker
 current_price = client.ticker_24hr(symbol: 'ETHUSDT')
 lastPrice = current_price[:lastPrice].to_f
-puts lastPrice
+
+puts " #========== BINANCE API-> PAUSED for TEST: after test uncomment lines above ========== !"
+# lastPrice = 1835.05
+puts "LAST PRICE: "+current_price[:lastPrice]
 # Send a request to get account information
-my_account = client.account
+# my_account = client.account
 
 
 # 2. ================== Read Signals ======================
-# file = CSV.read("signals.csv")
-# file = CSV.parse(File.read("orders.csv"), headers: true)
-# CSV.foreach('signals.csv', :headers => true) do |row|
-#     puts row['support']
-#     puts row['time_period']
-# end
-
 # === from SQL =====
 class TradeSignal < ActiveRecord::Base
     self.table_name = 'trade_signals'
 end
 
-signals = TradeSignal.all
-lastSignal = TradeSignal.last
+lastSignal = TradeSignal.where(period: period).last
+
+puts "TradeSignal.where(period: #{period}) ===> "
+puts "DATE: "+ lastSignal.date.to_s+" PERIOD: "+lastSignal.period.to_s
+# abort "TEST DONE! "
+
 # ==== check date for last signals =====
 # ==== time comparison ====
 last1hour = (now - 1.hours).strftime "%Y-%m-%d  %H:%M:%S"
@@ -99,27 +105,37 @@ def sell(order,now,lastPrice, lastSignal)
     order.save
 end
 
-period = '15min'
+# === BUY ORDER ====
+# :profit, :channel_id,:trade_type,:period, :buy_signal_id, :sell_signal_id, :buy_amount, :buy_price, :buy_date, :sell_amount, :sell_price, :sell_date
+def buy(now,lastPrice, lastSignal, buy_amount, period)
+    order = Order.new
+    order.buy_date = now
+    order.buy_amount = buy_amount
+    order.buy_price = lastPrice
+    order.buy_signal_id = lastSignal.id
+    order.period = period
+    order.save
+end
+
+buy_amount = 0.2
 # order = Orders.where(sell_amount: [nil, "", 0.0]).last
+# 5min, 15min ... 4h гэх мэт цагаар фильтерлэж, зарагдсан утга байхгүйг нь ялгаж авна.
 order = Orders.where(period: period).where(sell_amount: [nil, 0.0, ""]).last
 
 # abort "LAST OPEN ORDER "+order.buy_date.to_s
 
 # order.sell_amount нь activerecord-ийн float учир нэг бол nil, нэг бол 0.0 байна
-if order.sell_amount.blank? || order.sell_amount <= 0.0
+if order.sell_amount.blank? || order.sell_amount <= 0.0   # Хэрэв buy=done, sell=NOT_DONE_YET буюу зарагдаагүй бол
     sell(order,now,lastPrice, lastSignal)
     puts "UNFINISHED TRADE EXISTS: BUY=yes, SELL=nil"
 else
+    buy(now,lastPrice, lastSignal, buy_amount, period) # Хэрэв buy=done, sell=done бол шинээр АВАХ захиалга өгч болно.
     puts "PREVIOUS TRADE FINISHED: you can create new one"
 end
 
 
 
-# === BUY ORDER ====
-# def buy()
-#     # :profit, :channel_id,:trade_type,:period, :buy_signal_id, :sell_signal_id, :buy_amount, :buy_price, :buy_date, :sell_amount, :sell_price, :sell_date
-#     order = Order.new(order_params)
-# end
+
 
 puts "======== ORDER ========"
 puts "order.buy_date:"+ order.buy_date.to_s + "order.sell_date:"+order.sell_date.to_s

@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_04_101455) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_08_085830) do
+  create_table "channels", force: :cascade do |t|
+    t.float "support"
+    t.float "resistance"
+    t.string "channel_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "orders", force: :cascade do |t|
     t.float "buy_amount"
     t.float "buy_price"
@@ -20,6 +28,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_04_101455) do
     t.datetime "sell_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "period"
+    t.integer "buy_signal_id"
+    t.integer "sell_signal_id"
+    t.float "profit"
+    t.integer "channel_id"
+    t.string "trade_type"
   end
 
   create_table "trade_signals", force: :cascade do |t|
@@ -37,6 +51,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_04_101455) do
     t.float "last_close_price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "period"
   end
 
 end

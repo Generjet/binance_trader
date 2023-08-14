@@ -1,0 +1,32 @@
+<%= form_with(model: channel) do |form| %>
+  <% if channel.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(channel.errors.count, "error") %> prohibited this channel from being saved:</h2>
+
+      <ul>
+        <% channel.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :support, style: "display: block" %>
+    <%= form.text_field :support %>
+  </div>
+
+  <div>
+    <%= form.label :resistance, style: "display: block" %>
+    <%= form.text_field :resistance %>
+  </div>
+
+  <div>
+    <%= form.label :channel_status, style: "display: block" %>
+    <%= form.text_field :channel_status %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

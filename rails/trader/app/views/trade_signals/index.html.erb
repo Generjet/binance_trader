@@ -6,6 +6,7 @@
   <table class='table' border=1>
     <thead>
       <tr>
+        <th>ID</th>
         <th>date</th>
         <th>rsi</th>
         <th>%K</th>
@@ -23,7 +24,9 @@
     <tbody>
       <% @trade_signals.each do |signal| %>
         <tr>
-          <th><%= signal.date %></th>
+          <th><%= signal.id %></th>
+          <th><%= signal.period %></th>
+          <th><%= link_to signal.date, signal %></th>
           <th><%= signal.rsi.ceil(2) %></th>
           <th><%= signal.k.ceil(2) %></th>
           <th><%= signal.d.ceil(2) %></th>
@@ -36,9 +39,6 @@
           <th><%= signal.bot_signal %></th>
           <th><%= signal.last_close_price %></th>
         </tr>
-        <p>
-          <%= link_to "Show this trade signal", signal %>
-        </p>
       <% end %>
     </tbody>
   </table>

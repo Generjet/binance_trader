@@ -5,23 +5,37 @@
 <table class='table' border=1>
   <thead>
     <tr>
+      <th>ID</th>
+      <th>period</th>
+      <th>buy_signal</th>
       <th>buy_amount</th>
       <th>buy_price</th>
       <th>buy_date</th>
+      <th>sell_signal</th>
       <th>sell_amount</th>
       <th>sell_price</th>
       <th>sell_date</th>
+      <th>profit</th>
+      <th>channel</th>
+      <th>trade_type</th>
     </tr>
   </thead>
   <tbody>
     <% @orders.each do |order| %>
       <tr>
+        <td><%= order.id %></td>
+        <td><%= order.period %></td>
+        <td><%= order.buy_signal_id %></td>
         <td><%= order.buy_amount %></td>
         <td><%= order.buy_price %></td>
         <td><%= order.buy_date %></td>
+        <td><%= order.sell_signal_id %></td>
         <td><%= order.sell_amount %></td>
         <td><%= order.sell_price %></td>
         <td><%= order.sell_date %></td>
+        <td><%= order.profit %></td>
+        <td><%= order.channel_id %></td>
+        <td><%= order.trade_type %></td>
       </tr>
     <% end %>
   </tbody>

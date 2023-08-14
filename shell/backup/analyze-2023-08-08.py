@@ -15,12 +15,8 @@ import sqlite3
 from os.path import exists as file_exists
 import sys
 
-# period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
-period = sys.argv[1]
-print("period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M")
-print ("The GIVEN PERIOD is: " + period)
-
-# sys.exit(0)
+period = sys.argv[0]
+print ("The GIVEN PERIOD is %s" % (sys.argv[0]))
 
 # GENERJET API KEY and SECRET
 api_key = os.getenv('API_KEY')
@@ -126,7 +122,14 @@ def long_short_decide(long, short):
     short['Sell'] = np.where( (short['Close'] < short['ema']) & (short['rsi'] > 50) & ( short['High'] > short['sell_zone'] ) & ( short['support'] < short['resistance'] )  , short['Close'], np.nan )
     # === LONG check ====
     long['Buy'] = np.where( (long['%K'].between(0,30)) & (long['%D'].between(0,30)) & (long['%K'] < long['%D'] ) & (long['rsi'] < 50) & ( long['Low'] < long['buy_zone'] ) , long['Close'], np.nan )
+    # long['Buy'] = np.where( (long['rsi'] < 50) & ( long['Low'] < long['buy_zone'] ) , long['Close'], np.nan )
+    # long['Buy'] = np.where( (long['Close'] > long['ema']) & (long['rsi'] < 50) & ( long['Low'] < long['buy_zone'] ) , long['Close'], np.nan )
     long['Sell'] = np.where( (long['%K'].between(75,100)) & (long['%D'].between(75,100)) & (long['%K'] > long['%D'] ) & (long['rsi'] > 65) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
+    # long['Sell'] = np.where( (long['rsi'] > 55) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
+    
+    # long['Sell'] = np.where( (long['%D'] > 73) & (long['%K'] > 73) & (long['Close'] < long['ema']) & (long['rsi'] > 55) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
+    # long['Sell'] = np.where( (long['Close'] < long['ema']) & (long['rsi'] > 55) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
+    # long['Sell'] = np.where( (long['rsi'] > 50) & ( long['High'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) & (long['%K'].between(60,100)) & (long['%D'].between(60,100)) & (long['%K'] > long['%D'] ) , long['Close'], np.nan )
 
     # === Buy, if price goes UP and breaks RESISTANCE or SELL if breaks SUPPORT ===
     signal = 'wait'
@@ -149,7 +152,7 @@ def long_short_decide(long, short):
 
 # SHORT TERM data
 symbol = 'ETHUSDT'
-timePeriod = '5m'
+timePeriod = '30m'
 lookback = '60'
 shortTerm = fetchCryptoData(symbol, timePeriod, lookback )
 shortTerm['resistance'] = np.nan
@@ -161,7 +164,7 @@ shortTerm['%K'] = np.nan
 
 #LOGN TERM data
 symbol = 'ETHUSDT'
-timePeriod = period
+timePeriod = '4h'
 lookback = '96'
 longTerm = fetchCryptoData(symbol, timePeriod, lookback )
 longTerm['resistance'] = np.nan
@@ -171,7 +174,6 @@ longTerm['rsi'] = np.nan
 longTerm['%D'] = np.nan
 longTerm['%K'] = np.nan
 
-print("DATA fetched for"+period, longTerm)
 # ===== PERFORM ======
 resistance(longTerm)
 support(longTerm)
@@ -259,3 +261,33 @@ if __name__ == "__main__":
 
     connection.commit()
     connection.close()
+
+# ===== UPDATE ROW if "Sell" is confirmed ========
+# def update_csv_data(sell_date, sell_amount, sell_price):
+#     # Specify the path to your CSV file
+#     csv_file_path = "orders.csv"
+
+#     # Read data from CSV file and update rows if status matches "wait"
+#     updated_rows = []
+#     with open(csv_file_path, 'r', newline='') as file:
+#         reader = csv.DictReader(file)
+#         fieldnames = reader.fieldnames
+
+#         for row in reader:
+#             if row['sell_date'] == 'wait':
+#                 row['sell_amount'] = str(sell_amount)
+#                 row['sell_price'] = str(sell_price)
+#                 row['sell_date'] = '2023-07-28 06:30:00'
+#             updated_rows.append(row)
+
+#     # Write the updated data back to the CSV file, overwriting the existing contents
+#     with open(csv_file_path, 'w', newline='') as file:
+#         writer = csv.DictWriter(file, fieldnames=fieldnames)
+#         writer.writeheader()
+#         writer.writerows(updated_rows)
+
+# # Example usage:
+# sell_date = "wait"
+# sell_amount = 0.66
+# sell_price = 2025.99
+# update_csv_data(sell_date, sell_amount, sell_price)
