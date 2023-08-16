@@ -201,7 +201,7 @@ support = newest['support'][0]
 resistance = newest['resistance'][0]
 buy_zone = newest['buy_zone'][0]
 sell_zone = newest['sell_zone'][0]
-bot_signal = 'buy'
+bot_signal = signal
 print('BUY_ZONE ', buy_zone)
 
 header = ['date','rsi','%K','%D','macd','support','resistance','buy_zone','sell_zone','period']
