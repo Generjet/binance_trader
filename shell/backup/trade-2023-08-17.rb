@@ -7,11 +7,8 @@ require 'date'
 
 # ==== GET arguments from command line ====
 period = ARGV[0]
-# strategy: 1.rocket -no resistance, only SIGNALS 2. channel - between support&resistance only 3. mixed - both SIGNALS&Channels
-strategy = ARGV[1]
 puts "available period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M"
 puts 'GOT PERIOD VARIABLE from COMMAND LINE: => '+period
-puts 'GOT STRATEGY: '+strategy
 
 # === ACTIVE RECORD connection =====
 # now = DateTime.now.strftime "%Y-%m-%d  %H:%M:%S"
@@ -92,28 +89,24 @@ end
 
 # ========== query not SOLD trade orders by activerecord =========
 # === SELL ORDER ===
-def sell(order,now,lastPrice, lastSignal, strategy)
+def sell(order,now,lastPrice, lastSignal)
     order.sell_date = now
     order.sell_amount = order.buy_amount
     order.sell_price = lastPrice
     order.sell_signal_id = lastSignal.id
     order.profit  = order.sell_price - order.buy_price
-    # === set order -> trade_type ====
-    order.trade_type = strategy
     order.save
 end
 
 # === BUY ORDER ====
 # :profit, :channel_id,:trade_type,:period, :buy_signal_id, :sell_signal_id, :buy_amount, :buy_price, :buy_date, :sell_amount, :sell_price, :sell_date
-def buy(now,lastPrice, lastSignal, buy_amount, period, strategy)
+def buy(now,lastPrice, lastSignal, buy_amount, period)
     order = Orders.new
     order.buy_date = now
     order.buy_amount = buy_amount
     order.buy_price = lastPrice
     order.buy_signal_id = lastSignal.id
     order.period = period
-    # === set order -> trade_type ====
-    order.trade_type = strategy
     order.save
 end
 
@@ -121,15 +114,14 @@ buy_amount = 0.2
 # order = Orders.where(sell_amount: [nil, "", 0.0]).last
 # 5min, 15min ... 4h гэх мэт цагаар фильтерлэж, зарагдсан утга байхгүйг нь ялгаж авна.
 # order = Orders.where(period: period).where(sell_amount: [nil, 0.0]).last
-# order = Orders.where(period: period).last
-order = Orders.where(period: period).where(trade_type: strategy).last
+order = Orders.where(period: period).last
 # ====== previous order finished or not, check it ======
 if order 
-    puts "STRATGEY ORDER =========> :  buy_date: "+order.buy_date.to_s + " sell_date: "+ order.sell_date.to_s + " sell_amount: "+ order.sell_amount.to_s
+    puts "ORDER =========> :  buy_date: "+order.buy_date.to_s + " sell_date: "+ order.sell_date.to_s + " sell_amount: "+ order.sell_amount.to_s
     if order.buy_amount != nil && order.sell_amount != nil
         u_can_buy = true
         u_can_sell = false
-    elsif order.buy_amount != nil && order.sell_amount.nil? && lastPrice > (order.buy_price + 5.0)
+    elsif order.buy_amount != nil && order.sell_amount.nil? && lastPrice > (order.buy_price + 6.0)
         u_can_buy = false
         u_can_sell = true
     end
@@ -138,65 +130,38 @@ else
     u_can_sell = false
 end
 
-puts "BUY or SELL  " + order.buy_amount.to_s
 # ==== decide to trade based on decision of previous order finished or not and signals =====
-
-# ================= STRATEGY: ROCKET =======================
-if strategy == 'rocket'
-    puts 'ROCKET STRATEGY'
-    # === SELL signals for ROCKET strategy can be customized ===
-    sell_zone = true if lastSignal.sell_zone < lastPrice
-    sell_stoch = true if (lastSignal.k > 85) && (lastSignal.d > 85) && (lastSignal.k > lastSignal.d)
-    sell_rsi = true if (lastSignal.rsi > 80)
-    sell_macd = true if (lastSignal.macd > 20)
-    if buy_zone && buy_stoch && buy_rsi && u_can_buy == true
-        puts "NowPrice:"+lastPrice.to_s+" < BuyZone:"+lastSignal.buy_zone.to_s + " ==> U can buy"
-        buy(now,lastPrice, lastSignal, buy_amount, period, strategy) # Хэрэв buy=done, sell=done бол шинээр АВАХ захиалга өгч болно.
-        lastSignal.bot_signal = 'buy'
-    elsif sell_stoch && sell_rsi && u_can_sell == true
-        puts "NowPrice:"+lastPrice.to_s+" > SellZone:"+lastSignal.sell_zone.to_s + " ==> U can SELL"
-        lastSignal.bot_signal = 'sell'
-        sell(order,now,lastPrice, lastSignal, strategy)
-    else
-        lastSignal.bot_signal = 'wait'
-        puts "Now Price:"+lastPrice.to_s+" BuyZone: "+lastSignal.buy_zone.to_s + " SellZone: "+lastSignal.sell_zone.to_s + " ==> WAIT"
-    end
-end
-# ================= STRATEGY: CHANNEL ======================
-if strategy == 'channel'
-    puts 'CHANNEL STRATEGY'
-    if buy_zone && u_can_buy == true
-        puts "NowPrice:"+lastPrice.to_s+" < BuyZone:"+lastSignal.buy_zone.to_s + " ==> U can buy"
-        buy(now,lastPrice, lastSignal, buy_amount, period, strategy) # Хэрэв buy=done, sell=done бол шинээр АВАХ захиалга өгч болно.
-        lastSignal.bot_signal = 'buy'
-    elsif sell_zone && u_can_sell == true
-        puts "NowPrice:"+lastPrice.to_s+" > SellZone:"+lastSignal.sell_zone.to_s + " ==> U can SELL"
-        lastSignal.bot_signal = 'sell'
-        sell(order,now,lastPrice, lastSignal, strategy)
-    else
-        lastSignal.bot_signal = 'wait'
-        puts "Now Price:"+lastPrice.to_s+" BuyZone: "+lastSignal.buy_zone.to_s + " SellZone: "+lastSignal.sell_zone.to_s + " ==> WAIT"
-    end
-end
-
-# ================= STRATEGY: MIXED =========================
-if strategy.nil? || strategy == 'mixed'
-    puts 'MIXED STRATEGY'
-    if buy_zone && buy_stoch && buy_rsi && u_can_buy == true
-        puts "NowPrice:"+lastPrice.to_s+" < BuyZone:"+lastSignal.buy_zone.to_s + " ==> U can buy"
-        buy(now,lastPrice, lastSignal, buy_amount, period, strategy) # Хэрэв buy=done, sell=done бол шинээр АВАХ захиалга өгч болно.
-        lastSignal.bot_signal = 'buy'
-    elsif sell_zone && sell_stoch && sell_rsi && u_can_sell == true
-        puts "NowPrice:"+lastPrice.to_s+" > SellZone:"+lastSignal.sell_zone.to_s + " ==> U can SELL"
-        lastSignal.bot_signal = 'sell'
-        sell(order,now,lastPrice, lastSignal, strategy)
-    else
-        lastSignal.bot_signal = 'wait'
-        puts "Now Price:"+lastPrice.to_s+" BuyZone: "+lastSignal.buy_zone.to_s + " SellZone: "+lastSignal.sell_zone.to_s + " ==> WAIT"
-    end
+if buy_zone && buy_stoch && buy_rsi && u_can_buy == true
+    puts "NowPrice:"+lastPrice.to_s+" < BuyZone:"+lastSignal.buy_zone.to_s + " ==> U can buy"
+    buy(now,lastPrice, lastSignal, buy_amount, period) # Хэрэв buy=done, sell=done бол шинээр АВАХ захиалга өгч болно.
+    lastSignal.bot_signal = 'buy'
+elsif sell_zone && sell_stoch && sell_rsi && u_can_sell == true
+    puts "NowPrice:"+lastPrice.to_s+" > SellZone:"+lastSignal.sell_zone.to_s + " ==> U can SELL"
+    lastSignal.bot_signal = 'sell'
+    sell(order,now,lastPrice, lastSignal)
+else
+    lastSignal.bot_signal = 'wait'
+    puts "Now Price:"+lastPrice.to_s+" BuyZone: "+lastSignal.buy_zone.to_s + " SellZone: "+lastSignal.sell_zone.to_s + " ==> WAIT"
 end
 
 # === saving lastSignal.bot_signal value for further analysis
 lastSignal.save
 
-puts "======== ORDER DONE========"
+puts "======== ORDER ========"
+abort "DEBUG =====> DONE: "  # + "order.buy_date:"+ order.buy_date.to_s + "order.sell_date:"+order.sell_date.to_s
+
+
+
+# 4. ============= Place an order ========================
+# response = client.new_order(symbol: 'ETHUSDT', side: 'SELL', price: 1945, quantity: 0.0294, type: 'LIMIT', timeInForce: 'GTC')
+
+# 5. ============== Update or Insert into Orders =========
+# # === insert ===
+# order = Orders.new
+# order.buy_signal = ARGV[0]
+# order.buy_time = ARGV[1]
+# order.buy_order = ARGV[2]
+# order.buy_amount = ARGV[3]
+# order.buy_price = ARGV[4]
+# order.currency = ARGV[5]
+# order.save

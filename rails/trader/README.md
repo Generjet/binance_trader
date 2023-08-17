@@ -13,7 +13,10 @@ Sell is allowed if:
 status = started 
 
 Харин Stop_Loss trade-ийн хувьд:
-if price goes down below support & orders.sell_date = nil , then  
+if price < support+20 & orders.sell_date = nil # which means crypto is bought at some point(near support), but not sold yet because price dropped further below support.
+then
+create stop_loss_trade row:
+1.   
 
 
 * Micro time period scalping
