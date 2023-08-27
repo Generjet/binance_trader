@@ -1,3 +1,5 @@
+import yfinance as yf
+import mplfinance as mpf
 from binance.client import Client
 import os
 import ta
@@ -5,12 +7,13 @@ import time
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import polars as pl
 import datetime
 import csv
 import sqlite3
 from os.path import exists as file_exists
 import sys
-import schedule
 
 # period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
 period = sys.argv[1]
@@ -22,7 +25,6 @@ print ("The GIVEN PERIOD is: " + period)
 # GENERJET API KEY and SECRET
 api_key = os.getenv('API_KEY')
 api_secret = os.getenv('API_SECRET')
-print("API_KEY ",api_key)
 client = Client(api_key, api_secret)
 # ======== setting overall signal values to variables ====
 currency = 'ETHUSDT'
@@ -146,60 +148,74 @@ def long_short_decide(long, short):
 # =======================================================
 
 # SHORT TERM data
-def getData():
-    print('Getting data ....')
-    symbol = 'ETHUSDT'
-    timePeriod = '5m'
-    lookback = '60'
-    shortTerm = fetchCryptoData(symbol, timePeriod, lookback )
-    shortTerm['resistance'] = np.nan
-    shortTerm['support'] = np.nan
-    shortTerm['macd'] = np.nan
-    shortTerm['rsi'] = np.nan
-    shortTerm['%D'] = np.nan
-    shortTerm['%K'] = np.nan
-    #LOGN TERM data
-    symbol = 'ETHUSDT'
-    timePeriod = period
-    lookback = '96'
-    longTerm = fetchCryptoData(symbol, timePeriod, lookback )
-    longTerm['resistance'] = np.nan
-    longTerm['support'] = np.nan
-    longTerm['macd'] = np.nan
-    longTerm['rsi'] = np.nan
-    longTerm['%D'] = np.nan
-    longTerm['%K'] = np.nan
-    print("DATA fetched for"+period, longTerm)
-    # ==================================================
-    # ===== INSERT INTO SIGNALS.CSV =========
-    now = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-    fileName = 'trade_signals.csv'
-    # === PREPARE signals ROW ====
-    newest = longTerm.tail(1)
-    # ======== setting overall signal values to variables ====
-    last_close_price = shortTerm.tail(1)['Close'][0]
-    rsi = newest['rsi'][0]
-    k = newest['%K'][0]
-    d = newest['%D'][0]
-    macd = newest['macd'][0]
-    support = newest['support'][0]
-    resistance = newest['resistance'][0]
-    buy_zone = newest['buy_zone'][0]
-    sell_zone = newest['sell_zone'][0]
-    bot_signal = signal
-    print('BUY_ZONE ', buy_zone)
-    header = ['date','rsi','%K','%D','macd','support','resistance','buy_zone','sell_zone','period']
-    signalValues  = []
-    signalValues.insert(0,now)
-    signalValues.insert(1, newest.rsi[0])
-    signalValues.insert(2, newest['%K'][0])
-    signalValues.insert(3, newest['%D'][0])
-    signalValues.insert(4, newest['macd'][0])
-    signalValues.insert(5, newest['support'][0])
-    signalValues.insert(6, newest['resistance'][0])
-    signalValues.insert(7, newest['buy_zone'][0])
-    signalValues.insert(8, newest['sell_zone'][0])
-    signalValues.insert(9, period)
+symbol = 'ETHUSDT'
+timePeriod = '5m'
+lookback = '60'
+shortTerm = fetchCryptoData(symbol, timePeriod, lookback )
+shortTerm['resistance'] = np.nan
+shortTerm['support'] = np.nan
+shortTerm['macd'] = np.nan
+shortTerm['rsi'] = np.nan
+shortTerm['%D'] = np.nan
+shortTerm['%K'] = np.nan
+
+#LOGN TERM data
+symbol = 'ETHUSDT'
+timePeriod = period
+lookback = '96'
+longTerm = fetchCryptoData(symbol, timePeriod, lookback )
+longTerm['resistance'] = np.nan
+longTerm['support'] = np.nan
+longTerm['macd'] = np.nan
+longTerm['rsi'] = np.nan
+longTerm['%D'] = np.nan
+longTerm['%K'] = np.nan
+
+print("DATA fetched for"+period, longTerm)
+# ===== PERFORM ======
+resistance(longTerm)
+support(longTerm)
+resistance(shortTerm)
+support(shortTerm)
+applytechnicals(longTerm)
+applytechnicals(shortTerm)
+signal = long_short_decide(longTerm, shortTerm)
+plot_df(longTerm)
+print("SIGNAL =====> ", signal)
+
+
+# ==================================================
+# ===== INSERT INTO SIGNALS.CSV =========
+now = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+fileName = 'trade_signals.csv'
+
+# === PREPARE signals ROW ====
+newest = longTerm.tail(1)
+# ======== setting overall signal values to variables ====
+last_close_price = shortTerm.tail(1)['Close'][0]
+rsi = newest['rsi'][0]
+k = newest['%K'][0]
+d = newest['%D'][0]
+macd = newest['macd'][0]
+support = newest['support'][0]
+resistance = newest['resistance'][0]
+buy_zone = newest['buy_zone'][0]
+sell_zone = newest['sell_zone'][0]
+bot_signal = signal
+print('BUY_ZONE ', buy_zone)
+
+header = ['date','rsi','%K','%D','macd','support','resistance','buy_zone','sell_zone','period']
+signalValues  = []
+signalValues.insert(0,now)
+signalValues.insert(1, newest.rsi[0])
+signalValues.insert(2, newest['%K'][0])
+signalValues.insert(3, newest['%D'][0])
+signalValues.insert(4, newest['macd'][0])
+signalValues.insert(5, newest['support'][0])
+signalValues.insert(6, newest['resistance'][0])
+signalValues.insert(7, newest['buy_zone'][0])
+signalValues.insert(8, newest['sell_zone'][0])
+signalValues.insert(9, period)
 
 def create_signals():
     with open(fileName, 'w') as f:
@@ -222,48 +238,24 @@ def append_signals():
         f.close()
 
 # === CHECK if file exists ====
-def insertSignal():
-    print("Insert ")
-    if file_exists(fileName):
-        print("File bainaa baina: ", fileName)
-        append_signals()
-    else:
-        print("File OBSOO, we will create it: ", fileName)
-        create_signals()
+if file_exists(fileName):
+    print("File bainaa baina: ", fileName)
+    append_signals()
+else:
+    print("File OBSOO, we will create it: ", fileName)
+    create_signals()
 
-    # ===== INSERT into SIGNALS table =====
-    if __name__ == "__main__":
-        local_db_path = "../rails/trader/db/development.sqlite3"
-        connection = sqlite3.connect(local_db_path)
-        db_cursor = connection.cursor()
-        new_signal = (period, now,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,now,now)
-        # Insert into database
-        sql = """INSERT INTO trade_signals(period, date,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,created_at,updated_at)
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"""
-        db_cursor.execute(sql, new_signal)
-        connection.commit()
-        connection.close()
+# ===== INSERT into SIGNALS table =====
+if __name__ == "__main__":
+    local_db_path = "../rails/trader/db/development.sqlite3"
+    connection = sqlite3.connect(local_db_path)
+    db_cursor = connection.cursor()
+    new_signal = (period, now,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,now,now)
 
-# run all
-# ===== PERFORM ======
-def analyze():
-    print("analyzing")
-    getData()
-    resistance(longTerm)
-    support(longTerm)
-    resistance(shortTerm)
-    support(shortTerm)
-    applytechnicals(longTerm)
-    applytechnicals(shortTerm)
-    signal = long_short_decide(longTerm, shortTerm)
-    plot_df(longTerm)
-    print("SIGNAL =====> ", signal)
-    insertSignal()
+    # Insert into database
+    sql = """INSERT INTO trade_signals(period, date,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,created_at,updated_at)
+             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"""
+    db_cursor.execute(sql, new_signal)
 
-# schedule
-analyze()
-# schedule.every(3).seconds.do(analyze)
-
-# while True:
-#     schedule.run_pending()
-#     time.sleep(2)
+    connection.commit()
+    connection.close()
