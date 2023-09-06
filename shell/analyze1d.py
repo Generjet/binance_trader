@@ -1,5 +1,3 @@
-import yfinance as yf
-import mplfinance as mpf
 from binance.client import Client
 import os
 import ta
@@ -7,8 +5,6 @@ import time
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-import polars as pl
 import datetime
 import csv
 import sqlite3
