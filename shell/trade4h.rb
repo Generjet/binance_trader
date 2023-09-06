@@ -5,10 +5,6 @@ require 'sqlite3'
 require 'active_record'
 require 'date'
 
-
-# ========== CRONJOB test ===========
-File.open('rubyAutomationResult.txt',"a") { |f| f.write "Ruby Automation is done at #{Time.now} successfully \n" }
-
 # === ACTIVE RECORD connection =====
 # now = DateTime.now.strftime "%Y-%m-%d  %H:%M:%S"
 now = DateTime.now
@@ -25,7 +21,7 @@ now = DateTime.now
 # client = Binance::Spot.new(base_url: 'https://testnet.binance.vision')
 # puts client.time
 # ==== jinhene =======
-client = Binance::Spot.new(key: ENV["API_KEY"], secret: ENV["API_SECRET"])
+client = Binance::Spot.new(key: ENV["bot_api_key"], secret: ENV["bot_api_secret"])
 # Send a request to query BTCUSDT ticker
 current_price = client.ticker_24hr(symbol: 'ETHUSDT')
 lastPrice = current_price[:lastPrice].to_f
@@ -103,14 +99,14 @@ def sell(order,now,lastPrice, lastSignal)
     order.save
 end
 
-period = '5min'
+period = '1h'
 # order = Orders.where(sell_amount: [nil, "", 0.0]).last
 order = Orders.where(period: period).where(sell_amount: [nil, 0.0, ""]).last
 
 # abort "LAST OPEN ORDER "+order.buy_date.to_s
 
 # order.sell_amount нь activerecord-ийн float учир нэг бол nil, нэг бол 0.0 байна
-if order && (order.sell_amount.blank? || order.sell_amount <= 0.0 || order.sell_amount.nil?)
+if order.sell_amount.blank? || order.sell_amount <= 0.0
     sell(order,now,lastPrice, lastSignal)
     puts "UNFINISHED TRADE EXISTS: BUY=yes, SELL=nil"
 else
@@ -126,10 +122,23 @@ end
 # end
 
 puts "======== ORDER ========"
-puts "order.buy_date:"+ order.buy_date.to_s + "order.sell_date:"+order.sell_date.to_s if order
+puts "order.buy_date:"+ order.buy_date.to_s + "order.sell_date:"+order.sell_date.to_s
+# === FOR SCHEDULE DEBUGING ===
+File.open('ruby_schedule_log.txt',"a") { |f| f.write "The row #{Time.now} test done \n"}
 # abort "DEBUG =====> DONE"
 
 
 
 # 4. ============= Place an order ========================
 # response = client.new_order(symbol: 'ETHUSDT', side: 'SELL', price: 1945, quantity: 0.0294, type: 'LIMIT', timeInForce: 'GTC')
+
+# 5. ============== Update or Insert into Orders =========
+# # === insert ===
+# order = Orders.new
+# order.buy_signal = ARGV[0]
+# order.buy_time = ARGV[1]
+# order.buy_order = ARGV[2]
+# order.buy_amount = ARGV[3]
+# order.buy_price = ARGV[4]
+# order.currency = ARGV[5]
+# order.save
