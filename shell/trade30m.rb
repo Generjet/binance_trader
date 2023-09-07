@@ -5,7 +5,7 @@ require 'sqlite3'
 require 'active_record'
 require 'date'
 require 'binance-ruby'
-period = '5m'
+period = '30m'
 puts "======== RUBY ============ #{period} ======> :"
 # ========== CRONJOB test ===========
 # File.open('rubyAutomationResult.txt',"a") { |f| f.write "Ruby Automation is done at #{Time.now} successfully \n" }
