@@ -14,8 +14,8 @@ import sys
 # period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
 # period = sys.argv[1]
 period = '1h'
-print("period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M")
-print ("The GIVEN PERIOD is: " + period)
+#print("period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M")
+print ("=== PYTHON ==============> The GIVEN PERIOD is: " + period)
 
 # sys.exit(0)
 
@@ -36,7 +36,7 @@ def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
     frame = frame.astype(float)
     return frame
 
-print("wait")
+#print("wait")
 
 # === RESISTANCE until NOW ===
 def resistance(df):
@@ -45,8 +45,8 @@ def resistance(df):
     resistance_points = resistances.sort_values(ascending=True).tail(2)
     resistance_mean = resistance_points.max()
     
-    print("RESISTANCES ", resistances)
-    print("RESISTANCES MEAN P0INT ", resistance_mean)
+    #print("RESISTANCES ", resistances)
+    #print("RESISTANCES MEAN P0INT ", resistance_mean)
     df['resistance'] = resistance_mean
 
 # ======== SUPPORT =======
@@ -54,8 +54,8 @@ def support(df):
     supports = df[df.Low == df.Low.rolling(10, center=True).min()].Low
     support_points = supports.sort_values(ascending=True).head(2)
     support_mean = supports.min()
-    print("SUPPORTS ", supports)
-    print("SUPPORTS MEAN PINT ", support_mean)
+    #print("SUPPORTS ", supports)
+    #print("SUPPORTS MEAN PINT ", support_mean)
     df['support'] = support_mean
 
 # ===== PLOT and SAVE ======
@@ -116,8 +116,8 @@ def long_short_decide(long, short):
     # ==== BUY, if is within channel and not yet overbought ====
     current = short.tail(1)
     longTerm = long.tail(1)
-    print('CURRENT value ',current)
-    print('LONGMAA ', longTerm)
+    #print('CURRENT value ',current)
+    #print('LONGMAA ', longTerm)
     # === SHORT check ====
     short['Buy'] = np.where( (short['Close'] > short['ema']) & (short['rsi'] < 45) & ( short['Low'] < short['buy_zone'] ) & ( short['support'] < short['resistance'] ) , short['Close'], np.nan )
     short['Sell'] = np.where( (short['Close'] < short['ema']) & (short['rsi'] > 50) & ( short['High'] > short['sell_zone'] ) & ( short['support'] < short['resistance'] )  , short['Close'], np.nan )
@@ -129,17 +129,17 @@ def long_short_decide(long, short):
     signal = 'wait'
     if (current['Close'][0] > longTerm['resistance'][0]) & (longTerm['rsi'][0] > 70 ):
         breakout_buy = True
-        print("BREAKOUT BUY TRUE")
+        #print("BREAKOUT BUY TRUE")
         signal = 'buy'
     elif (current['Close'][0] < longTerm['support'][0]) & (longTerm['rsi'][0] < 30 ):
-        print("BREAKOUT SELL TRUE")
+        #print("BREAKOUT SELL TRUE")
         breakout_buy = False
         signal = 'sell'
     elif (current['Close'][0] > longTerm['sell_zone'][0]) & (current['Close'][0] < longTerm['resistance'][0]) & (longTerm['rsi'][0] > 60):
-        print("CHANNEL SELL")
+        #print("CHANNEL SELL")
         signal = 'sell'
     elif (current['Close'][0] < longTerm['buy_zone'][0]) & (current['Close'][0] > longTerm['support'][0]) & (longTerm['rsi'][0] < 30):
-        print("CHANNEL BUY")
+        #print("CHANNEL BUY")
         signal = 'buy'
     return signal
 # =======================================================
@@ -168,7 +168,7 @@ longTerm['rsi'] = np.nan
 longTerm['%D'] = np.nan
 longTerm['%K'] = np.nan
 
-print("DATA fetched for"+period, longTerm)
+#print("DATA fetched for"+period, longTerm)
 # ===== PERFORM ======
 resistance(longTerm)
 support(longTerm)
@@ -242,17 +242,23 @@ else:
     print("File OBSOO, we will create it: ", fileName)
     create_signals()
 
-# ===== INSERT into SIGNALS table =====
-if __name__ == "__main__":
-    local_db_path = "../rails/trader/db/development.sqlite3"
-    connection = sqlite3.connect(local_db_path)
-    db_cursor = connection.cursor()
-    new_signal = (period, now,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,now,now)
+# === TODO: remove after test ===
+# bot_signal = "sell"
 
-    # Insert into database
-    sql = """INSERT INTO trade_signals(period, date,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,created_at,updated_at)
-             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"""
-    db_cursor.execute(sql, new_signal)
+# ===== save to SQL if signal is other than "WAIT" =====
+if bot_signal == "buy" or bot_signal == "sell":
+    print("BOT SIGNAL is other than WAIT, ==> ", bot_signal)
+    # ===== INSERT into TradeSignals table ===
+    if __name__ == "__main__":
+        local_db_path = "../rails/trader/db/development.sqlite3"
+        connection = sqlite3.connect(local_db_path)
+        db_cursor = connection.cursor()
+        new_signal = (period, now,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,now,now)
 
-    connection.commit()
-    connection.close()
+        # Insert into database
+        sql = """INSERT INTO trade_signals(period, date,rsi,k,d,macd,support,resistance,buy_zone,sell_zone,currency,bot_signal,last_close_price,created_at,updated_at)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"""
+        db_cursor.execute(sql, new_signal)
+
+        connection.commit()
+        connection.close()

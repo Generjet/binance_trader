@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_08_085830) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_07_110542) do
   create_table "channels", force: :cascade do |t|
     t.float "support"
     t.float "resistance"
@@ -52,6 +52,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_08_085830) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "period"
+  end
+
+  create_table "trade_statuses", force: :cascade do |t|
+    t.string "period"
+    t.string "trade_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
 end

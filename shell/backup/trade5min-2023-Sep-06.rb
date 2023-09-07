@@ -5,10 +5,9 @@ require 'sqlite3'
 require 'active_record'
 require 'date'
 
-period = '15m'
-puts "======== RUBY ============ #{period} ======> :"
+period = '5m'
 # ========== CRONJOB test ===========
-# File.open('rubyAutomationResult.txt',"a") { |f| f.write "Ruby Automation is done at #{Time.now} successfully \n" }
+File.open('rubyAutomationResult.txt',"a") { |f| f.write "Ruby Automation is done at #{Time.now} successfully \n" }
 
 # === ACTIVE RECORD connection =====
 # now = DateTime.now.strftime "%Y-%m-%d  %H:%M:%S"
@@ -58,12 +57,9 @@ class TradeSignal < ActiveRecord::Base
 end
 
 lastSignal = TradeSignal.where(period: period).last
-if lastSignal
-    puts "TradeSignal.where(period: #{period}) ===> "
-    puts "DATE: "+ lastSignal.date.to_s+" PERIOD: "+lastSignal.period.to_s
-else
-    abort "No LAST SIGNALS, quit"
-end
+
+puts "TradeSignal.where(period: #{period}) ===> "
+puts "DATE: "+ lastSignal.date.to_s+" PERIOD: "+lastSignal.period.to_s
 # abort "TEST DONE! "
 
 # ==== check date for last signals =====
@@ -82,6 +78,18 @@ unless withinRange
     abort "Signal Hour Differs: ===> exit"
 end
 
+# ==== check Buy or Sell condition from signals ====
+# === BUY signals ===
+buy_zone = true if lastSignal.buy_zone > lastPrice
+buy_stoch = true if (lastSignal.k < 30) && (lastSignal.d < 30) && (lastSignal.k < lastSignal.d)
+buy_rsi = true if (lastSignal.rsi < 50)
+buy_macd = true if (lastSignal.macd < -15)
+# === SELL signals ===
+sell_zone = true if lastSignal.sell_zone < lastPrice
+sell_stoch = true if (lastSignal.k > 70) && (lastSignal.d > 70) && (lastSignal.k > lastSignal.d)
+sell_rsi = true if (lastSignal.rsi > 65)
+sell_macd = true if (lastSignal.macd > 20)
+
 # 3. ================== Read Orders ================
 class Orders < ActiveRecord::Base
     self.table_name = 'orders'
@@ -89,7 +97,7 @@ class Orders < ActiveRecord::Base
 end
 
 # === SELL ORDER ===
-def sell(order,now,lastPrice, lastSignal, period)
+def sell(order,now,lastPrice, lastSignal)
     order.sell_date = now
     order.sell_amount = order.buy_amount
     order.sell_price = lastPrice
@@ -119,28 +127,37 @@ end
 
 # order = Orders.where(period: period).where(sell_amount: [nil, 0.0, ""]).last
 order = Orders.where(period: period).last
-
 # order_not_sold = true if (order.sell_amount.blank? || order.sell_amount <= 0.0 || order.sell_amount.nil?)
 if order && (order.sell_amount.blank? || order.sell_amount <= 0.0 || order.sell_amount.nil?)
     order_not_sold = true
 else
     order_not_sold = false
 end
+# ======== DECISION to TRADE =====================
+puts "Now Price:"+lastPrice.to_s+" BuyZone: "+lastSignal.buy_zone.to_s + " SellZone: "+lastSignal.sell_zone.to_s
+# ======= OLD METHOD for TRADE DECISION ================
+# if buy_zone && buy_stoch && buy_rsi && (order_not_sold == false )
+#     puts "NowPrice:"+lastPrice.to_s+" < BuyZone:"+lastSignal.buy_zone.to_s + " ==> U can buy"
+#     puts "PREVIOUS TRADE FINISHED: you can buy new one"
+#     buy(now,lastPrice, lastSignal, buy_amount, period) # Хэрэв buy=done, sell=done бол шинээр АВАХ захиалга өгч болно.
+# elsif sell_zone && sell_stoch && sell_rsi && (order_not_sold == true)
+#     puts "NowPrice:"+lastPrice.to_s+" > SellZone:"+lastSignal.sell_zone.to_s + " ==> U can SELL"
+#     puts "UNFINISHED TRADE EXISTS: BUY=yes, SELL=nil"
+#     sell(order,now,lastPrice, lastSignal)
+# else
+#     puts "Now Price:"+lastPrice.to_s+" BuyZone: "+lastSignal.buy_zone.to_s + " SellZone: "+lastSignal.sell_zone.to_s + " ==> WAIT"
+#     abort "NO Buy/Sell signal, only Wait signal => ABORT"
+# end
 
 # ===== NEW METHOD for TRADE DECISION using only Python signals ============
-puts "LAST SIGNAL ============ > #{lastSignal.bot_signal}"
-if lastSignal.bot_signal == "buy"
+if lastSignal.bot_signal == 'buy' && order_not_sold == false
     puts "NowPrice:"+lastPrice.to_s+" < BuyZone:"+lastSignal.buy_zone.to_s + " ==> U can buy"
-    if order_not_sold == false
-        puts "PREVIOUS TRADE FINISHED: you can buy new one"
-        buy(now,lastPrice, lastSignal, buy_amount, period) # Хэрэв buy=done, sell=done бол шинээр АВАХ захиалга өгч болно.
-    end
-elsif lastSignal.bot_signal == "sell"
+    puts "PREVIOUS TRADE FINISHED: you can buy new one"
+    buy(now,lastPrice, lastSignal, buy_amount, period) # Хэрэв buy=done, sell=done бол шинээр АВАХ захиалга өгч болно.
+elsif sell_zone && sell_stoch && sell_rsi && (order_not_sold == true)
     puts "NowPrice:"+lastPrice.to_s+" > SellZone:"+lastSignal.sell_zone.to_s + " ==> U can SELL"
-    if order_not_sold == true
-        puts "UNFINISHED TRADE EXISTS: BUY=yes, SELL=nil"
-        sell(order,now,lastPrice, lastSignal,period)
-    end
+    puts "UNFINISHED TRADE EXISTS: BUY=yes, SELL=nil"
+    sell(order,now,lastPrice, lastSignal)
 else
     puts "Now Price:"+lastPrice.to_s+" BuyZone: "+lastSignal.buy_zone.to_s + " SellZone: "+lastSignal.sell_zone.to_s + " ==> WAIT"
     abort "NO Buy/Sell signal, only Wait signal => ABORT"

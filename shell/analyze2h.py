@@ -13,7 +13,7 @@ import sys
 
 # period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
 # period = sys.argv[1]
-period = '8h'
+period = '2h'
 #print("period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M")
 print ("=== PYTHON ==============> The GIVEN PERIOD is: " + period)
 

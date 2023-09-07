@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :trade_statuses
   resources :channels
   resources :trade_signals
   resources :orders

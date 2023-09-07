@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @trade_status %>
+
+<div>
+  <%= link_to "Edit this trade status", edit_trade_status_path(@trade_status) %> |
+  <%= link_to "Back to trade statuses", trade_statuses_path %>
+
+  <%= button_to "Destroy this trade status", @trade_status, method: :delete %>
+</div>
