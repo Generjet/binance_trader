@@ -63,11 +63,14 @@ def analyze1d():
 	os.system('python analyze1d.py')
 	print('1d ANALYZE python RUN')
 # 30m
-schedule.every(30).minutes.do(analyze30m)
-schedule.every(33).minutes.do(trade30m)
-# 1h
-schedule.every(4).hours.do(analyze30m)
-schedule.every(4).hours.at(":02").do(trade30m)
+schedule.every(5).minutes.do(analyze30m)
+schedule.every(7).minutes.do(trade30m)
+# 4h
+schedule.every(4).hours.do(analyze4h)
+schedule.every(4).hours.at("02:15").do(trade4h)
+# Run jobs every 5th hour, 20 minutes and 30 seconds in.
+# If current time is 02:00, first execution is at 06:20:30
+# schedule.every(5).hours.at("20:30").do(job)
 
 while True:
 	schedule.run_pending()
