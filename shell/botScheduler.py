@@ -62,9 +62,12 @@ def analyze8h():
 def analyze1d():
 	os.system('python analyze1d.py')
 	print('1d ANALYZE python RUN')
+# 5m
+schedule.every(5).minutes.do(analyze5m)
+schedule.every(6).minutes.at(":55").do(trade5m)
 # 30m
-schedule.every(5).minutes.do(analyze30m)
-schedule.every(7).minutes.do(trade30m)
+schedule.every(30).minutes.at(":55").do(analyze30m)
+schedule.every(33).minutes.at(":55").do(trade30m)
 # 4h
 schedule.every(4).hours.do(analyze4h)
 schedule.every(4).hours.at("02:15").do(trade4h)
