@@ -92,7 +92,7 @@ def trade3d():
 	print("3d trade RUBY run")
 
 # 1 W
-def trade5m():
+def trade1w():
 	os.system('ruby trade.rb 1w mixed')
 	print("1w trade RUBY run")
 
@@ -106,36 +106,31 @@ schedule.every(17).minutes.do(trade15m)
 schedule.every(30).minutes.do(analyze30m)
 schedule.every(32).minutes.do(trade30m)
 # 1h
-schedule.every(60).minutes.do(analyze1h)
-schedule.every(62).minutes.do(trade1h)
+schedule.every(61).minutes.do(analyze1h)
+schedule.every(63).minutes.do(trade1h)
 # 4h
-schedule.every(4).hours.at(":4").do(analyze4h)
-schedule.every(4).hours.at(":6").do(trade4h)
-# schedule.every(240).minutes.do(analyze4h)
-# schedule.every(242).minutes.do(trade4h)
+schedule.every(240).minutes.do(analyze4h)
+schedule.every(242).minutes.do(trade4h)
 
 # 8h
-# Run job every hour at the 42nd minute
-schedule.every(8).hours.at(":9").do(analyze8h)
-schedule.every(8).hours.at(":11").do(trade8h)
-# schedule.every(320).minutes.do(analyze8h)
-# schedule.every(322).minutes.do(trade8h)
+schedule.every(320).minutes.do(analyze8h)
+schedule.every(322).minutes.do(trade8h)
 
 # 1d
 # Run job every day at specific HH:MM and next HH:MM:SS
 schedule.every().day.at("01:19").do(analyze1d)
 schedule.every().day.at("01:21").do(trade1d)
-# schedule.every(320).minutes.do(analyze8h)
-# schedule.every(322).minutes.do(trade8h)
+# schedule.every(320).minutes.do(analyze1d)
+# schedule.every(322).minutes.do(trade1d)
 
 # 3d
 # Run job every day at specific HH:MM and next HH:MM:SS
-schedule.every(3).days.at("02:19").do(analyze1d)
-schedule.every(3).days.at("02:21").do(trade1d)
+schedule.every(3).days.at("02:19").do(analyze3d)
+schedule.every(3).days.at("02:21").do(trade3d)
 
 # 1w
-schedule.every(3).weeks.at("03:19").do(analyze1w)
-schedule.every(3).weeks.at("03:21").do(trade1w)
+schedule.every(3).weeks.do(analyze1w)
+schedule.every(3).weeks.do(trade1w)
 
 while True:
 	schedule.run_pending()
