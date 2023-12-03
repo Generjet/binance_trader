@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<playlist xmlns="http://xspf.org/ns/0/" xmlns:vlc="http://www.videolan.org/vlc/playlist/ns/0/" version="1">
+	<title>Playlist</title>
+	<trackList>
+		<track>
+			<location>file:///home/tamiserver/Videos/Alita%20Battle%20Angel.mp4</location>
+			<duration>218778</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>0</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Bee%20Gees%20-%20You%20Should%20Be%20Dancing%20COREOGRAFIA%20%23discoretro.mp4</location>
+			<duration>65248</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>1</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Blue%20-%20U%20Make%20Me%20Wanna.mp4</location>
+			<duration>228159</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>2</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/%5BCOLOR%20DANCE%5D%20FIFTY%20FIFTY%20-%20Cupid%20(Twin%20Ver.)%204K%20Performance%20video%20%23FIFTYFIFTY%20%23Performance.mp4</location>
+			<duration>194258</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>3</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Erdenetuya-huurhun%20burmaa%20(lyrics).mp4</location>
+			<duration>275481</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>4</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/FIFTY%20FIFTY%20(%ED%94%BC%ED%94%84%ED%8B%B0%ED%94%BC%ED%94%84%ED%8B%B0)%20-%20&#39;Cupid&#39;%20Official%20MV.mp4</location>
+			<duration>202663</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>5</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/FIFTY%20FIFTY%20-%20Cupid%20(Twin%20Ver.)%20(Official%20Instrumental%20with%20backing%20vocals)%20Lyrics%20.mp4</location>
+			<duration>177075</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>6</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Girls&#39;%20Generation%20%EC%86%8C%EB%85%80%EC%8B%9C%EB%8C%80%20&#39;Chocolate%20Love&#39;%20MV.mp4</location>
+			<duration>239885</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>7</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Girls&#39;%20Generation%20%E5%B0%91%E5%A5%B3%E6%99%82%E4%BB%A3%20&#39;FLOWER%20POWER&#39;%20MV.mp4</location>
+			<duration>222191</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>8</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/(HD%201080p)%20Girls&#39;%20Generation%20-%20Genie%20(Dance%20ver.%20with%20Korean%20Audio).mp4</location>
+			<duration>211626</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>9</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Itgel-Negen%20zugt%20-%20Hair%20irlee.mp4</location>
+			<duration>204056</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>10</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/IU%20Good%20Day%20Lyrics.mp4</location>
+			<duration>235055</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>11</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/IU%20(%EC%95%84%EC%9D%B4%EC%9C%A0)%20_%20Good%20Day%20(%EC%A2%8B%EC%9D%80%20%EB%82%A0)%20_%20MV.mp4</location>
+			<duration>357378</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>12</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/IU%20Modern%20Times%20Lyrics%20(%EC%95%84%EC%9D%B4%EC%9C%A0%20%EB%AA%A8%EB%8D%98%20%ED%83%80%EC%9E%84%EC%A6%88%20%EA%B0%80%EC%82%AC).mp4</location>
+			<duration>210047</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>13</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/IU%20-%20You%20&amp;%20I%20(%EB%84%88%EB%9E%91%20%EB%82%98)%20%5BEasy%20Lyrics_Color%20Coded_Eng%5D.mp4</location>
+			<duration>243136</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>14</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/IU(%EC%95%84%EC%9D%B4%EC%9C%A0)%20_%20YOU&amp;I(%EB%84%88%EB%9E%91%EB%82%98)%20MV.mp4</location>
+			<duration>533873</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>15</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/K-Maro%20-%20Femme%20Like%20U%20(Donne-moi%20Ton%20Corps)%20(Official%20Video%20HD).mp4</location>
+			<duration>236402</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>16</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Lee%20Seung%20Chul%20(%EC%9D%B4%EC%8A%B9%EC%B2%A0)%20-%20My%20Love%20Lyrics%20(Han,%20Rom,%20Eng).mp4</location>
+			<duration>205008</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>17</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Mark%20Ronson%20-%20Uptown%20Funk%20(Official%20Video)%20ft.%20Bruno%20Mars.mp4</location>
+			<duration>270396</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>18</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/%5BMV%5D%20%EB%A6%B0%20(Lyn),%20%ED%95%9C%ED%95%B4%20(HanHae)%20-%20LOVE%20(Are%20You%20Human%20OST%20Part.2)%20%EB%84%88%EB%8F%84%20%EC%9D%B8%EA%B0%84%EC%9D%B4%EB%8B%88%20OST%20Part.2.mp4</location>
+			<duration>237145</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>19</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Puch%20hits.mp4</location>
+			<duration>2900636</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>20</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Saturday%20Night%20Fever%20(Bee%20Gees,%20You%20Should%20be%20Dancing)%20John%20Travolta%20HD%201080%20with%20Lyrics.mp4</location>
+			<duration>144010</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>21</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/say%20yes.mp4</location>
+			<duration>218453</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>22</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Shawn%20Mendes,%20Camila%20Cabello%20-%20Se%C3%B1orita%20(Clean%20-%20Lyrics).mp4</location>
+			<duration>191332</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>23</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/TAEYEON%20%ED%83%9C%EC%97%B0%20&#39;%EC%82%AC%EA%B3%84%20(Four%20Seasons)&#39;%20MV.mp4</location>
+			<duration>210210</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>24</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/T-ara-Roly%20Poly%20(Dance%20Ver.)%20%5B%E7%B9%81%E4%B8%AD%E9%9F%93%E5%B0%8D%E7%85%A7%20HD%20MV%5D.mp4</location>
+			<duration>213507</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>25</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/T-Dragon.jpg</location>
+			<duration>10000</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>26</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Tiktok%20-%20ding%20dong%20dang.mp4</location>
+			<duration>183066</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>27</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Ya%20eto%20ti%20-%20ti%20eto%20ya.mp4</location>
+			<duration>244088</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>28</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Yuju%20(%EC%9C%A0%EC%A3%BC%20of%20GFRIEND)%20-%20I&#39;m%20in%20the%20Mood%20for%20Dancing%20True%20Beauty%20OST%20Part.%202%20(%EC%97%AC%EC%8B%A0%EA%B0%95%EB%A6%BC).mp4</location>
+			<duration>211348</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>29</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/Zurkhnii%20uya.mp4</location>
+			<duration>142431</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>30</vlc:id>
+			</extension>
+		</track>
+		<track>
+			<location>file:///home/tamiserver/Videos/%E5%B0%91%E5%A5%B3%E6%99%82%E4%BB%A3%20_%20%EF%BC%AD%EF%BC%B2%EF%BC%8E%EF%BC%B4%EF%BC%A1%EF%BC%B8%EF%BC%A9%E3%80%80%EF%BC%88DANCE%20VER.%EF%BC%89.mp4</location>
+			<duration>217106</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>31</vlc:id>
+			</extension>
+		</track>
+	</trackList>
+	<extension application="http://www.videolan.org/vlc/playlist/0">
+		<vlc:item tid="0"/>
+		<vlc:item tid="1"/>
+		<vlc:item tid="2"/>
+		<vlc:item tid="3"/>
+		<vlc:item tid="4"/>
+		<vlc:item tid="5"/>
+		<vlc:item tid="6"/>
+		<vlc:item tid="7"/>
+		<vlc:item tid="8"/>
+		<vlc:item tid="9"/>
+		<vlc:item tid="10"/>
+		<vlc:item tid="11"/>
+		<vlc:item tid="12"/>
+		<vlc:item tid="13"/>
+		<vlc:item tid="14"/>
+		<vlc:item tid="15"/>
+		<vlc:item tid="16"/>
+		<vlc:item tid="17"/>
+		<vlc:item tid="18"/>
+		<vlc:item tid="19"/>
+		<vlc:item tid="20"/>
+		<vlc:item tid="21"/>
+		<vlc:item tid="22"/>
+		<vlc:item tid="23"/>
+		<vlc:item tid="24"/>
+		<vlc:item tid="25"/>
+		<vlc:item tid="26"/>
+		<vlc:item tid="27"/>
+		<vlc:item tid="28"/>
+		<vlc:item tid="29"/>
+		<vlc:item tid="30"/>
+		<vlc:item tid="31"/>
+	</extension>
+</playlist>
