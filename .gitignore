@@ -2,3 +2,5 @@ jupyter/testImages/*
 jupyter/charts/*
 shell/graphs/*
 shell/trade_signals.csv
+rails/trader/db/development.sqlite3
+rails/trader/db/test.sqlite3

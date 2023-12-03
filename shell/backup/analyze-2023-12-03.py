@@ -12,12 +12,10 @@ from os.path import exists as file_exists
 import sys
 
 # period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
-# period = sys.argv[1]
-period = '5m'
+period = sys.argv[1]
 print("period parameters are: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M")
 print ("The GIVEN PERIOD is: " + period)
 
-sys.exit(0)
 
 # GENERJET API KEY and SECRET
 api_key = os.getenv('API_KEY')
@@ -36,7 +34,7 @@ def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
     frame = frame.astype(float)
     return frame
 
-print("wait")
+print("binance client is: ",client)
 
 # === RESISTANCE until NOW ===
 def resistance(df):
@@ -126,27 +124,28 @@ def long_short_decide(long, short):
     long['Sell'] = np.where( (long['%K'].between(75,100)) & (long['%D'].between(75,100)) & (long['%K'] > long['%D'] ) & (long['rsi'] > 65) & ( long['Close'] > long['sell_zone'] ) & ( long['support'] < long['resistance'] ) , long['Close'], np.nan )
 
     # === Buy, if price goes UP and breaks RESISTANCE or SELL if breaks SUPPORT ===
-    signal = 'wait'
-    if (current['Close'][0] > longTerm['resistance'][0]) & (longTerm['rsi'][0] > 70 ):
-        breakout_buy = True
-        print("BREAKOUT BUY TRUE")
-        signal = 'buy'
-    elif (current['Close'][0] < longTerm['support'][0]) & (longTerm['rsi'][0] < 30 ):
-        print("BREAKOUT SELL TRUE")
-        breakout_buy = False
-        signal = 'sell'
-    elif (current['Close'][0] > longTerm['sell_zone'][0]) & (current['Close'][0] < longTerm['resistance'][0]) & (longTerm['rsi'][0] > 60):
-        print("CHANNEL SELL")
-        signal = 'sell'
-    elif (current['Close'][0] < longTerm['buy_zone'][0]) & (current['Close'][0] > longTerm['support'][0]) & (longTerm['rsi'][0] < 30):
-        print("CHANNEL BUY")
-        signal = 'buy'
-    return signal
+    # signal = 'wait'
+    # if (current['Close'][0] > longTerm['resistance'][0]) & (longTerm['rsi'][0] > 70 ):
+    #     breakout_buy = True
+    #     print("BREAKOUT BUY TRUE")
+    #     signal = 'buy'
+    # elif (current['Close'][0] < longTerm['support'][0]) & (longTerm['rsi'][0] < 30 ):
+    #     print("BREAKOUT SELL TRUE")
+    #     breakout_buy = False
+    #     signal = 'sell'
+    # elif (current['Close'][0] > longTerm['sell_zone'][0]) & (current['Close'][0] < longTerm['resistance'][0]) & (longTerm['rsi'][0] > 60):
+    #     print("CHANNEL SELL")
+    #     signal = 'sell'
+    # elif (current['Close'][0] < longTerm['buy_zone'][0]) & (current['Close'][0] > longTerm['support'][0]) & (longTerm['rsi'][0] < 30):
+    #     print("CHANNEL BUY")
+    #     signal = 'buy'
+    # return signal
 # =======================================================
 
 # SHORT TERM data
 symbol = 'ETHUSDT'
-timePeriod = '5m'
+# timePeriod = '5m'
+timePeriod = period
 lookback = '60'
 shortTerm = fetchCryptoData(symbol, timePeriod, lookback )
 shortTerm['resistance'] = np.nan
@@ -176,9 +175,10 @@ resistance(shortTerm)
 support(shortTerm)
 applytechnicals(longTerm)
 applytechnicals(shortTerm)
-signal = long_short_decide(longTerm, shortTerm)
+# signal = long_short_decide(longTerm, shortTerm)
+long_short_decide(longTerm, shortTerm)
 plot_df(longTerm)
-print("SIGNAL =====> ", signal)
+# print("SIGNAL =====> ", signal)
 
 
 # ==================================================
@@ -198,7 +198,8 @@ support = newest['support'][0]
 resistance = newest['resistance'][0]
 buy_zone = newest['buy_zone'][0]
 sell_zone = newest['sell_zone'][0]
-bot_signal = signal
+# bot_signal = signal
+bot_signal = "ruby_will_do_it"
 print('BUY_ZONE ', buy_zone)
 
 header = ['date','rsi','%K','%D','macd','support','resistance','buy_zone','sell_zone','period']

@@ -138,7 +138,7 @@ else
     u_can_sell = false
 end
 
-puts "BUY or SELL  " + order.buy_amount.to_s
+puts "BUY or SELL  " + order.buy_amount.to_s if order
 # ==== decide to trade based on decision of previous order finished or not and signals =====
 
 # ================= STRATEGY: ROCKET =======================
