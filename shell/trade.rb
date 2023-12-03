@@ -4,6 +4,7 @@ require 'binance'
 require 'sqlite3'
 require 'active_record'
 require 'date'
+require 'json'
 
 # ==== GET arguments from command line ====
 period = ARGV[0]
@@ -27,8 +28,8 @@ now = DateTime.now
 
 # 1. ============= Create a new client instance. ==============
 # ==== turshiltiih =====
-client = Binance::Spot.new(base_url: 'https://testnet.binance.vision')
-puts client.time
+# client = Binance::Spot.new(base_url: 'https://testnet.binance.vision')
+# puts client.time
 # ==== jinhene =======
 client = Binance::Spot.new(key: ENV["API_KEY"], secret: ENV["API_SECRET"])
 
@@ -42,6 +43,30 @@ puts "LAST PRICE: "+current_price[:lastPrice]
 # Send a request to get account information
 # my_account = client.account
 
+# =============== TRADE AMOUNT SETTINGS BEGIN =============
+# ===== ALL TRADE PERIODS =========
+# trade_periods = ['5m','15m','30m','1h','2h','4h','6h','8h','12h','1d','3d','1w','1M']
+trade_periods = ['5m','15m','30m','1h','4h','8h','1d','3d','1w']
+puts "===== setting trade amount ======"
+myAccount = client.account
+usdt = Hash.new
+myAccount[:balances].each do |coin|
+    if coin[:asset] == 'USDT'
+        usdt = coin
+        # puts usdt[:free]
+    end
+end
+
+puts "==== FREE USDT ===="
+puts usdt[:free] + "USDT available"
+puts usdt[:locked] + " USDT locked"
+
+trade_period_count = trade_periods.count
+puts "TRADE PERIODS count: "+trade_period_count.to_s + " of " +trade_periods.to_s
+
+trade_amount = usdt[:free].to_f / trade_period_count
+puts "trade_amount = " + trade_amount.to_s + " USDT for one trade"
+# =============== TRADE AMOUNT SETTINGS DONE =============
 
 # 2. ================== Read Signals ======================
 # === from SQL =====
@@ -118,7 +143,7 @@ def buy(now,lastPrice, lastSignal, buy_amount, period, strategy)
     order.save
 end
 
-buy_amount = 0.2
+buy_amount = trade_amount
 # order = Orders.where(sell_amount: [nil, "", 0.0]).last
 # 5min, 15min ... 4h гэх мэт цагаар фильтерлэж, зарагдсан утга байхгүйг нь ялгаж авна.
 # order = Orders.where(period: period).where(sell_amount: [nil, 0.0]).last
@@ -207,4 +232,5 @@ end
 lastSignal.save
 
 puts "======== ORDER DONE========"
-puts client.account
+
+# =========== TRADE amount =============
