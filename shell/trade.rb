@@ -30,7 +30,8 @@ now = DateTime.now
 client = Binance::Spot.new(base_url: 'https://testnet.binance.vision')
 puts client.time
 # ==== jinhene =======
-# client = Binance::Spot.new(key: ENV["bot_api_key"], secret: ENV["bot_api_secret"])
+client = Binance::Spot.new(key: ENV["API_KEY"], secret: ENV["API_SECRET"])
+
 # Send a request to query BTCUSDT ticker
 current_price = client.ticker_24hr(symbol: 'ETHUSDT')
 lastPrice = current_price[:lastPrice].to_f
