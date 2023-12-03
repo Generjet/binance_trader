@@ -1,2 +1,0 @@
-2023-09-02 16:59:23.911178 - /home/robin/miniconda3/python CRONJOB ****** - ****** ARDUINO DATA LOGGER TEST -> The script ran
-2023-09-02 17:01:28.152101 - /home/robin/miniconda3/python CRONJOB ****** - ****** ARDUINO DATA LOGGER TEST -> The script ran

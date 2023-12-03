@@ -207,3 +207,4 @@ end
 lastSignal.save
 
 puts "======== ORDER DONE========"
+puts client.account
