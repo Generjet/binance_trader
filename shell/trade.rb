@@ -198,6 +198,12 @@ if strategy.nil? || strategy == 'mixed'
 end
 
 # === saving lastSignal.bot_signal value for further analysis
+# lastSignal.bot_signal = 'buy'
+# if lastSignal.bot_signal != "wait"
+#     lastSignal.save
+# else
+#     puts "SIGNAL=SAVE, therefore dont save"
+# end
 lastSignal.save
 
 puts "======== ORDER DONE========"
