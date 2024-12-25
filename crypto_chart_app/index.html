@@ -4,23 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Candlestick Chart</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Crypto Candlestick Chart</h1>
         <div class="input-group">
             <label for="crypto">Cryptocurrency:</label>
-            <input type="text" id="crypto" placeholder="e.g., BTCUSDT" value="BTCUSDT">
+            <input type="text" id="crypto" name="symbol" placeholder="e.g., BTCUSDT" value="BTCUSDT">
         </div>
         <div class="input-group">
             <label for="interval">Interval:</label>
-            <input type="text" id="interval" placeholder="e.g., 1h" value="1h">
+            <input type="text" id="interval" name="interval" placeholder="e.g., 1h" value="1h">
         </div>
-        <button id="fetch-button">Fetch Data</button>
-        <div id="chart-container"></div>
+        <button id="fetch-button">
+            Fetch Data
+        </button>
+        <div id="chart-container">
+        </div>
     </div>
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-    <script src="app.js"></script>
+    <script src="/static/app.js"></script>
 </body>
 </html>
