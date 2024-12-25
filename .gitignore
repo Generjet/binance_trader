@@ -3,3 +3,6 @@ jupyter/charts/*
 shell/graphs/*
 shell/trade_signals.csv
 env/*
+env/bin/*
+env/lib64
+streamlit_env/Lib/*
