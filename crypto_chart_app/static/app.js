@@ -19,7 +19,7 @@ const y = d3.scaleLinear().range([height, 0]);
 
 let chartData = [];
 
-function createChart(data) {
+function createChart(data, extremumPoints) {
     x.domain(data.map(d => d.time));
     y.domain([d3.min(data, d => d.low), d3.max(data, d => d.high)]);
 
@@ -51,9 +51,21 @@ function createChart(data) {
         .attr("x2", d => x(d.time) + x.bandwidth() / 2)
         .attr("y2", d => y(d.low))
         .attr("stroke", "black");
+
+    if (extremumPoints) {
+        svg.selectAll(".extremum")
+            .data(extremumPoints)
+            .enter()
+            .append("circle")
+            .attr("class", "extremum")
+            .attr("cx", d => x(d.time) + x.bandwidth() / 2)
+            .attr("cy", d => y(d.value))
+            .attr("r", 5)
+            .attr("fill", d => d.type === "max" ? "blue" : "orange");
+    }
 }
 
-function updateChart(newData) {
+function updateChart(newData, extremumPoints) {
     if (newData) {
         chartData.push(newData);
         if (chartData.length > 100) {
@@ -62,7 +74,7 @@ function updateChart(newData) {
     }
 
     svg.selectAll("*").remove();
-    createChart(chartData);
+    createChart(chartData, extremumPoints);
 }
 
 const socket = io('http://localhost:5000', {
@@ -73,7 +85,7 @@ const socket = io('http://localhost:5000', {
 });
 
 socket.on('update_data', function(data) {
-    updateChart(data);
+    updateChart(data.data, data.extremum_points);
 });
 
 fetchButton.addEventListener('click', () => {

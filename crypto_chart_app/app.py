@@ -12,6 +12,15 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 current_data = []
 data_lock = threading.Lock()
 
+def find_extremum(data):
+    extremum_points = []
+    for i in range(1, len(data) - 1):
+        if data[i]['high'] > data[i - 1]['high'] and data[i]['high'] > data[i + 1]['high']:
+            extremum_points.append({'time': data[i]['time'], 'value': data[i]['high'], 'type': 'max'})
+        elif data[i]['low'] < data[i - 1]['low'] and data[i]['low'] < data[i + 1]['low']:
+            extremum_points.append({'time': data[i]['time'], 'value': data[i]['low'], 'type': 'min'})
+    return extremum_points
+
 def fetch_and_emit_data(symbol, interval):
     global current_data
     url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit=100'
@@ -28,13 +37,15 @@ def fetch_and_emit_data(symbol, interval):
                 'low': float(d[3]),
                 'close': float(d[4]),
             } for d in data]
-            
+
+            extremum_points = find_extremum(formatted_data)
+
             with data_lock:
                 current_data = []
                 for i in range(len(formatted_data)):
                     current_data.append(formatted_data[i])
-                    socketio.emit('update_data', formatted_data[i])
-                    time.sleep(3)
+                    socketio.emit('update_data', {'data': formatted_data[i], 'extremum_points': extremum_points})
+                    time.sleep(1)
 
         except requests.exceptions.RequestException as e:
             print(f'Error fetching data: {e}')
