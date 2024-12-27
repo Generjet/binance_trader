@@ -1,9 +1,54 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 import requests
+import time
+import threading
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+current_data = []
+data_lock = threading.Lock()
+
+def fetch_and_emit_data(symbol, interval):
+    global current_data
+    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit=100'
+    while True:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+
+            formatted_data = [{
+                'time': d[0] / 1000,
+                'open': float(d[1]),
+                'high': float(d[2]),
+                'low': float(d[3]),
+                'close': float(d[4]),
+            } for d in data]
+            
+            with data_lock:
+                current_data = []
+                for i in range(len(formatted_data)):
+                    current_data.append(formatted_data[i])
+                    socketio.emit('update_data', formatted_data[i])
+                    time.sleep(3)
+
+        except requests.exceptions.RequestException as e:
+            print(f'Error fetching data: {e}')
+            time.sleep(10)
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+    symbol = request.args.get('symbol', 'BTCUSDT')
+    interval = request.args.get('interval', '1h')
+    
+    thread = threading.Thread(target=fetch_and_emit_data, args=(symbol, interval))
+    thread.daemon = True
+    thread.start()
 
 @app.route('/')
 def index():
@@ -53,4 +98,4 @@ def chart():
         return f'Error fetching data: {e}', 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    socketio.run(app, debug=True, host='0.0.0.0')

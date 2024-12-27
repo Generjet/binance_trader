@@ -17,6 +17,8 @@ const svg = d3.select("#chart-container")
 const x = d3.scaleBand().range([0, width]).padding(0.1);
 const y = d3.scaleLinear().range([height, 0]);
 
+let chartData = [];
+
 function createChart(data) {
     x.domain(data.map(d => d.time));
     y.domain([d3.min(data, d => d.low), d3.max(data, d => d.high)]);
@@ -51,24 +53,31 @@ function createChart(data) {
         .attr("stroke", "black");
 }
 
-async function updateChart() {
-    const crypto = cryptoInput.value.toUpperCase();
-    const interval = intervalInput.value;
-    const apiUrl = `http://localhost:5000/chart?symbol=${crypto}&interval=${interval}`;
-
-    try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        svg.selectAll("*").remove();
-        createChart(data);
-    } catch (error) {
-        console.error('Error fetching data:', error);
+function updateChart(newData) {
+    if (newData) {
+        chartData.push(newData);
+        if (chartData.length > 100) {
+            chartData.shift();
+        }
     }
+
+    svg.selectAll("*").remove();
+    createChart(chartData);
 }
 
-fetchButton.addEventListener('click', updateChart);
+const socket = io('http://localhost:5000', {
+    query: {
+        symbol: cryptoInput.value.toUpperCase(),
+        interval: intervalInput.value
+    }
+});
 
-setInterval(updateChart, 3000);
+socket.on('update_data', function(data) {
+    updateChart(data);
+});
 
-updateChart();
+fetchButton.addEventListener('click', () => {
+    const crypto = cryptoInput.value.toUpperCase();
+    const interval = intervalInput.value;
+    socket.io.opts.query = { symbol: crypto, interval: interval };
+});
