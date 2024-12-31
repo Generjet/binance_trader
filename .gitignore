@@ -6,3 +6,8 @@ env/*
 env/bin/*
 env/lib64
 streamlit_env/Lib/*
+__pycache__/langchain.cpython-312.pyc
+env/lib64
+env/bin/python
+env/bin/python3
+env/bin/python3.9

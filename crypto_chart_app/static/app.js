@@ -65,7 +65,7 @@ function createChart(data, extremumPoints) {
     }
 }
 
-function updateChart(newData, extremumPoints) {
+function updateChart(newData, extremumPoints, isDoji, signal) {
     if (newData) {
         chartData.push(newData);
         if (chartData.length > 100) {
@@ -75,6 +75,25 @@ function updateChart(newData, extremumPoints) {
 
     svg.selectAll("*").remove();
     createChart(chartData, extremumPoints);
+
+    if (isDoji) {
+        svg.append("polygon")
+            .attr("points", `${x(newData.time) + x.bandwidth() / 2},${y(newData.high) - 15} ${x(newData.time) + x.bandwidth() / 2 - 5},${y(newData.high) - 5} ${x(newData.time) + x.bandwidth() / 2 + 5},${y(newData.high) - 5}`)
+            .attr("fill", "purple");
+    }
+
+    if (signal) {
+        let signalText = signal.toUpperCase();
+        let signalColor = signal === "buy" ? "green" : "red";
+        let signalY = signal === "buy" ? y(newData.low) + 20 : y(newData.high) - 20;
+
+        svg.append("text")
+            .attr("x", x(newData.time) + x.bandwidth() / 2)
+            .attr("y", signalY)
+            .attr("text-anchor", "middle")
+            .attr("fill", signalColor)
+            .text(signalText);
+    }
 }
 
 const socket = io('http://localhost:5000', {
@@ -85,7 +104,7 @@ const socket = io('http://localhost:5000', {
 });
 
 socket.on('update_data', function(data) {
-    updateChart(data.data, data.extremum_points);
+    updateChart(data.data, data.extremum_points, data.is_doji, data.signal);
 });
 
 fetchButton.addEventListener('click', () => {

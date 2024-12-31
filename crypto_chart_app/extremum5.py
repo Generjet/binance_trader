@@ -4,7 +4,6 @@ from flask_socketio import SocketIO, emit
 import requests
 import time
 import threading
-import statistics
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
@@ -25,37 +24,6 @@ def find_extremum(data):
         elif is_min:
             extremum_points.append({'time': data[i]['time'], 'value': data[i]['low'], 'type': 'min'})
     return extremum_points
-
-def is_bullish_doji(candle):
-    open_price = candle['open']
-    close_price = candle['close']
-    high_price = candle['high']
-    low_price = candle['low']
-
-    # Check if the candlestick is a Doji
-    is_doji = abs(open_price - close_price) / (high_price - low_price) < 0.1 if (high_price - low_price) > 0 else False
-
-    # Check if the Doji is bullish (appears in a downtrend)
-    # This is a simplified check; in a real scenario, you might want to analyze the preceding trend
-    is_bullish = is_doji and close_price > open_price
-
-    return is_bullish
-
-def calculate_signal(data):
-    if len(data) < 20:
-        return "hold"  # Not enough data for calculation
-
-    # Calculate 20-period moving average
-    ma20 = sum(d['close'] for d in data[-20:]) / 20
-
-    current_close = data[-1]['close']
-
-    if current_close > ma20:
-        return "buy"
-    elif current_close < ma20:
-        return "sell"
-    else:
-        return "hold"
 
 def fetch_and_emit_data(symbol, interval):
     global current_data
@@ -79,15 +47,8 @@ def fetch_and_emit_data(symbol, interval):
             with data_lock:
                 current_data = []
                 for i in range(len(formatted_data)):
-                    is_doji = is_bullish_doji(formatted_data[i])
-                    signal = calculate_signal(formatted_data[:i+1])
                     current_data.append(formatted_data[i])
-                    socketio.emit('update_data', {
-                        'data': formatted_data[i],
-                        'extremum_points': extremum_points,
-                        'is_doji': is_doji,
-                        'signal': signal
-                    })
+                    socketio.emit('update_data', {'data': formatted_data[i], 'extremum_points': extremum_points})
                     time.sleep(3)
 
         except requests.exceptions.RequestException as e:
