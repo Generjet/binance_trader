@@ -1,2 +1,0 @@
-class TradeSignal < ApplicationRecord
-end

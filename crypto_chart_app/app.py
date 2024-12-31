@@ -5,6 +5,8 @@ import requests
 import time
 import threading
 import statistics
+import pandas as pd
+import ta
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
@@ -13,18 +15,18 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 current_data = []
 data_lock = threading.Lock()
 
-def find_extremum(data):
-    extremum_points = []
-    window = 5
-    for i in range(window, len(data) - window):
-        is_max = all(data[i]['high'] > data[j]['high'] for j in range(i - window, i + window + 1) if j != i)
-        is_min = all(data[i]['low'] < data[j]['low'] for j in range(i - window, i + window + 1) if j != i)
 
-        if is_max:
-            extremum_points.append({'time': data[i]['time'], 'value': data[i]['high'], 'type': 'max'})
-        elif is_min:
-            extremum_points.append({'time': data[i]['time'], 'value': data[i]['low'], 'type': 'min'})
-    return extremum_points
+def find_extremum(df):
+    window = 100  # Use the last 100 data points for rolling calculation
+    # df['resistance'] = df['high'].rolling(window=window, min_periods=1).max()
+    # df['support'] = df['low'].rolling(window=window, min_periods=1).min()
+    resistances = df[df.high == df.high.rolling(10, center=True).max()].high
+    resistance_mean = resistances.max()
+    df['resistance'] = resistance_mean
+    supports = df[df.low == df.low.rolling(window, center=True).min()].low
+    support_mean = supports.min()
+    df['support'] = support_mean
+    return df
 
 def is_bullish_doji(candle):
     open_price = candle['open']
@@ -57,9 +59,26 @@ def calculate_signal(data):
     else:
         return "hold"
 
+def apply_technicals(df):
+    # Calculate MACD
+    df['macd'] = ta.trend.macd_diff(df['close'])
+
+    # Calculate RSI
+    df['rsi'] = ta.momentum.rsi(df['close'], window=14)
+
+    # Calculate Stochastic Oscillator
+    df['%K'] = ta.momentum.stoch(df['high'], df['low'], df['close'], window=14, smooth_window=3)
+    df['%D'] = df['%K'].rolling(3).mean()
+
+    # Calculate EMA
+    df['ema'] = df['close'].ewm(span=14, adjust=False).mean()
+
+    df.dropna(inplace=True)
+    return df
+
 def fetch_and_emit_data(symbol, interval):
     global current_data
-    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit=100'
+    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit=500'
     while True:
         try:
             response = requests.get(url)
@@ -72,9 +91,16 @@ def fetch_and_emit_data(symbol, interval):
                 'high': float(d[2]),
                 'low': float(d[3]),
                 'close': float(d[4]),
+                'volume': float(d[5])
             } for d in data]
 
-            extremum_points = find_extremum(formatted_data)
+            df = pd.DataFrame(formatted_data)
+            df = find_extremum(df)
+            df = apply_technicals(df)
+            
+            # Convert time to readable format
+            df['time'] = pd.to_datetime(df['time'], unit='s').dt.strftime('%Y-%m-%d %H:%M')
+            formatted_data = df.to_dict('records')
 
             with data_lock:
                 current_data = []
@@ -82,13 +108,20 @@ def fetch_and_emit_data(symbol, interval):
                     is_doji = is_bullish_doji(formatted_data[i])
                     signal = calculate_signal(formatted_data[:i+1])
                     current_data.append(formatted_data[i])
+                    print(f"Emitting data: {formatted_data[i]['support']}")
                     socketio.emit('update_data', {
                         'data': formatted_data[i],
-                        'extremum_points': extremum_points,
                         'is_doji': is_doji,
-                        'signal': signal
+                        'signal': signal,
+                        'support': formatted_data[i]['support'],
+                        'resistance': formatted_data[i]['resistance'],
+                        'macd': formatted_data[i]['macd'],
+                        'rsi': formatted_data[i]['rsi'],
+                        '%K': formatted_data[i]['%K'],
+                        '%D': formatted_data[i]['%D'],
+                        'ema': formatted_data[i]['ema']
                     })
-                    time.sleep(3)
+                    time.sleep(1)
 
         except requests.exceptions.RequestException as e:
             print(f'Error fetching data: {e}')

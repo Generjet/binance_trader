@@ -11,3 +11,4 @@ env/lib64
 env/bin/python
 env/bin/python3
 env/bin/python3.9
+.aider*
