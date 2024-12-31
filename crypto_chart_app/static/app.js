@@ -162,7 +162,7 @@ function updateTable(newData) {
     });
 }
 
-function updateChart(newData, extremumPoints, isDoji, signal, support, resistance) {
+function updateChart(newData, isDoji, signal, support, resistance) {
     if (newData) {
         chartData.push(newData);
         if (chartData.length > 100) {
@@ -174,15 +174,12 @@ function updateChart(newData, extremumPoints, isDoji, signal, support, resistanc
     svgRSI.selectAll("*").remove();
     svgMACD.selectAll("*").remove();
 
-    createChart(chartData, extremumPoints);
+    createChart(chartData);
     drawRSIChart(chartData);
     drawMACDChart(chartData);
 
     // Draw support and resistance lines
-    console.log("Support:", support); // Debugging log
-    console.log("Resistance:", resistance); // Debugging log
-    console.log("y scale:", y.domain()); // Debugging log
-    if (support && y) {
+    if (support) {
         svg.append("line")
             .attr("class", "support")
             .attr("x1", 0)
@@ -193,7 +190,7 @@ function updateChart(newData, extremumPoints, isDoji, signal, support, resistanc
             .attr("stroke-width", 2);
     }
 
-    if (resistance && y) {
+    if (resistance) {
         svg.append("line")
             .attr("class", "resistance")
             .attr("x1", 0)
@@ -234,8 +231,7 @@ const socket = io('http://localhost:5000', {
 });
 
 socket.on('update_data', function(data) {
-    console.log("Received data:", data); // Debugging log
-    updateChart(data.data, data.extremum_points, data.is_doji, data.signal, data.support, data.resistance);
+    updateChart(data.data, data.is_doji, data.signal, data.support, data.resistance);
 });
 
 fetchButton.addEventListener('click', () => {
@@ -255,8 +251,8 @@ createTable([
         volume: '',
         macd: '',
         rsi: '',
-        '%K': '',
-        '%D': '',
+        'stochastic-K': '',
+        'stochastic-D': '',
         ema: '',
         support: '',
         resistance: '',
