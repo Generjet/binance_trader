@@ -42,8 +42,34 @@ timePeriod = '5m'
 lookback = '60'
 df = fetchCryptoData(symbol, timePeriod, lookback )
 
-# Initialize the app
+# =========== extremum ===============
+def find_extremum(df):
+    window = 100  # Use the last 100 data points for rolling calculation
+    # df['resistance'] = df['high'].rolling(window=window, min_periods=1).max()
+    # df['support'] = df['low'].rolling(window=window, min_periods=1).min()
+    resistances = df[df.High == df.High.rolling(10, center=True).max()].High
+    resistance_mean = resistances.max()
+    df['resistance'] = resistance_mean
+    supports = df[df.Low == df.Low.rolling(window, center=True).min()].Low
+    support_mean = supports.min()
+    df['support'] = support_mean
+    return df
+ 
+ # =========== TA technical analysis ===============
+def applytechnicals(df):
+    # window for 14 days and smooth window for 3days
+    df['%K'] = ta.momentum.stoch(df.High, df.Low, df.Close, window=14, smooth_window=3)
+    df['%D'] = df['%K'].rolling(3).mean()
+    df['rsi'] = ta.momentum.rsi(df.Close, window=14)
+    df['macd'] = ta.trend.macd_diff(df.Close)
+    df['ema'] = df.iloc[:,0].ewm(span=14,adjust=False).mean()
+    df.dropna(inplace=True)
+    return df
+# Initialize the app ============ VIZUALIZE ============
 app = Dash()
+df = find_extremum(df)
+df = applytechnicals(df)
+print(df.tail(10))
 
 # Convert columns to numeric
 df[['Open', 'High', 'Low', 'Close']] = df[['Open', 'High', 'Low', 'Close']].apply(pd.to_numeric)
