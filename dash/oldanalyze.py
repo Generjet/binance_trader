@@ -23,18 +23,22 @@ def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
     df = pd.DataFrame(client.get_historical_klines(symbol, timePeriod, lookback + ago ))
     df = df.iloc[:,:6]
     df.columns = ['Time', 'Open', 'High', 'Low', 'Close', 'Volume']
-    # df['Time'] = pd.to_datetime(df['Time'], unit='ms').dt.strftime('%Y-%m-%d %H:%M')
-    df.Time = pd.to_datetime(df.Time, unit='ms')
-    df.set_index('Time', inplace=True)
+    df['Time'] = pd.to_datetime(df['Time'], unit='ms').dt.strftime('%Y-%m-%d %H:%M')
+    # df.set_index('Time', inplace=True)
+    # df['Time'] = pd.to_datetime(df['Time'], unit='s').dt.strftime('%Y-%m-%d %H:%M')
+    df = df.astype(float)
     print(df.tail(10))
     return df
 
+# Incorporate DATABASE
+# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+
 # sqlite-aas data unshina
-DB_NAME = '../tamir_crypto_data.db'
-conn = sqlite3.connect(DB_NAME)
-query = "SELECT * FROM crypto_data ORDER BY time DESC LIMIT 100"
-df = pd.read_sql_query(query, conn)
-conn.close()
+# DB_NAME = '../tamir_crypto_data.db'
+# conn = sqlite3.connect(DB_NAME)
+# query = "SELECT * FROM crypto_data ORDER BY time DESC LIMIT 100"
+# df = pd.read_sql_query(query, conn)
+# conn.close()
 
 # get new data
 symbol = 'ETHUSDT'
@@ -45,17 +49,16 @@ df = fetchCryptoData(symbol, timePeriod, lookback )
 # Initialize the app
 app = Dash()
 
-# Convert columns to numeric
-df[['Open', 'High', 'Low', 'Close']] = df[['Open', 'High', 'Low', 'Close']].apply(pd.to_numeric)
-
-# Create candlestick chart
-fig = go.Figure(data=[go.Candlestick(
-    x=df.index,
-    open=df['Open'],
-    high=df['High'],
-    low=df['Low'],
-    close=df['Close']
-)])
+# fig chart
+fig = go.Figure(data=[
+    go.Candlestick(
+        x=df['Time'],
+        open=df['Open'],
+        high=df['High'],
+        close=df['Close'],
+        low=df['Low']
+        )]
+    )
 
 
 # App layout

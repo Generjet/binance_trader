@@ -1,9 +1,4 @@
 import dash
-from dash import dcc, html, Input, Output
-import plotly.graph_objects as go
-import sqlite3
-import pandas as pd
-import dash
 from dash import dcc, html, Input, Output, dash_table
 import plotly.graph_objects as go
 import sqlite3
