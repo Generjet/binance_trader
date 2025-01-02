@@ -50,16 +50,17 @@ df = fetchCryptoData(symbol, timePeriod, lookback )
 # Initialize the app
 app = Dash()
 
-# fig chart
-fig = go.Figure(data=[
-    go.Candlestick(
-        x=df['Time'],
-        open=df['Open'],
-        high=df['High'],
-        close=df['Close'],
-        low=df['Low']
-        )]
-    )
+# Convert columns to numeric
+df[['Open', 'High', 'Low', 'Close']] = df[['Open', 'High', 'Low', 'Close']].apply(pd.to_numeric)
+
+# Create candlestick chart
+fig = go.Figure(data=[go.Candlestick(
+    x=df.index,
+    open=df['Open'],
+    high=df['High'],
+    low=df['Low'],
+    close=df['Close']
+)])
 
 
 # App layout
