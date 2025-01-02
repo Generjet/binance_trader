@@ -1,20 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
-import requests
-import time
-import threading
-import statistics
 import pandas as pd
 import ta
 import sqlite3
+import plotly.graph_objects as go
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-current_data = []
-data_lock = threading.Lock()
 
 DB_NAME = 'tamir_crypto_data.db'
 
@@ -127,79 +119,29 @@ def save_data(df):
     conn.commit()
     conn.close()
 
-def fetch_and_emit_data(symbol, interval):
-    global current_data
-    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit=500'
-    while True:
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            data = response.json()
-
-            formatted_data = [{
-                'time': d[0] / 1000,
-                'open': float(d[1]),
-                'high': float(d[2]),
-                'low': float(d[3]),
-                'close': float(d[4]),
-                'volume': float(d[5])
-            } for d in data]
-
-            df = pd.DataFrame(formatted_data)
-            # Convert time to readable format
-            # df.set_index('time', inplace=True)
-            # df.index = pd.to_datetime(df.index, unit='ms')
-            df['time'] = pd.to_datetime(df['time'], unit='s').dt.strftime('%Y-%m-%d %H:%M')
-            # print(df.tail(5))
-
-            with data_lock:
-                current_data = []
-                for index, row in df.iterrows():
-                    current_data.append(row)
-                    if len(current_data) > 10:
-                        analyzedf = find_extremum(current_data)
-                        analyzedf = apply_technicals(analyzedf)
-                    else:
-                        analyzedf = []
-                                
-                    save_data(analyzedf)
-                    # is_doji = is_bullish_doji(row)
-                    signal = calculate_signal(analyzedf)
-                    
-                    # print(f"Emitting data: {row['support']} time is {row['time']}")
-                    print(analyzedf)
-                    # socketio.emit('update_data', {
-                    #     'data': row,
-                    #     # 'is_doji': is_doji,
-                    #     'signal': signal,
-                    #     'support': analyzedf['support'],
-                    #     'resistance': analyzedf['resistance'],
-                    #     'macd': analyzedf['macd'],
-                    #     'rsi': analyzedf['rsi'],
-                    #     'stochastic-K': analyzedf['stochastic-K'],
-                    #     'stochastic-D': analyzedf['stochastic-D'],
-                    #     'ema': analyzedf['ema']
-                    # })
-                    time.sleep(1)
-
-        except requests.exceptions.RequestException as e:
-            print(f'Error fetching data: {e}')
-            time.sleep(10)
-
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
-    symbol = request.args.get('symbol', 'BTCUSDT')
-    interval = request.args.get('interval', '1h')
-    
-    thread = threading.Thread(target=fetch_and_emit_data, args=(symbol, interval))
-    thread.daemon = True
-    thread.start()
-
 @app.route('/')
 def index():
-    with open('crypto_chart_app/index.html', 'r') as f:
-        return f.read()
+    conn = sqlite3.connect(DB_NAME)
+    query = "SELECT * FROM crypto_data ORDER BY time DESC LIMIT 100"
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+
+    if df.empty:
+        return "No data found", 404
+
+    # Create candlestick chart
+    fig = go.Figure(data=[go.Candlestick(
+        x=df['time'],
+        open=df['open'],
+        high=df['high'],
+        low=df['low'],
+        close=df['close']
+    )])
+
+    chart_html = fig.to_html(full_html=False)
+    table_html = df.to_html(classes='data', index=False)
+
+    return render_template('index.html', chart_html=chart_html, table_data=table_html)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')

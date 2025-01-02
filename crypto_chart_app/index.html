@@ -3,53 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Candlestick Chart</title>
-    <link rel="stylesheet" href="/static/styles.css">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <title>Crypto Chart</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Crypto Candlestick Chart</h1>
-        <div class="input-group">
-            <label for="crypto">Cryptocurrency:</label>
-            <input type="text" id="crypto" name="symbol" placeholder="e.g., BTCUSDT" value="BTCUSDT">
-        </div>
-        <div class="input-group">
-            <label for="interval">Interval:</label>
-            <input type="text" id="interval" name="interval" placeholder="e.g., 1h" value="1h">
-        </div>
-        <button id="fetch-button">
-            Fetch Data
-        </button>
         <div id="chart-container">
+            {{ chart_html | safe }}
         </div>
         <div id="table-container">
-            <table id="data-table">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Open</th>
-                        <th>High</th>
-                        <th>Low</th>
-                        <th>Close</th>
-                        <th>Volume</th>
-                        <th>MACD</th>
-                        <th>RSI</th>
-                        <th>%K</th>
-                        <th>%D</th>
-                        <th>EMA</th>
-                        <th>Support</th>
-                        <th>Resistance</th>
-                        <th>Signal</th>
-                        <th>is_doji</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+            {{ table_data | safe }}
         </div>
     </div>
-    <script src="/static/app.js"></script>
 </body>
 </html>
