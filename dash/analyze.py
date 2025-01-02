@@ -32,8 +32,29 @@ def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
 # sqlite-aas data unshina
 DB_NAME = '../tamir_crypto_data.db'
 conn = sqlite3.connect(DB_NAME)
-query = "SELECT * FROM crypto_data ORDER BY time DESC LIMIT 100"
-df = pd.read_sql_query(query, conn)
+
+# Create table if it doesn't exist
+create_table_query = """
+CREATE TABLE IF NOT EXISTS crypto_data (
+    Time DATETIME PRIMARY KEY,
+    Open REAL,
+    High REAL,
+    Low REAL,
+    Close REAL,
+    Volume REAL
+);
+"""
+conn.execute(create_table_query)
+conn.commit()
+
+# Try to read existing data
+try:
+    query = "SELECT * FROM crypto_data ORDER BY Time DESC LIMIT 100"
+    df = pd.read_sql_query(query, conn)
+except pd.errors.DatabaseError:
+    # If table is empty or error occurs, create empty DataFrame
+    df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'Volume'])
+
 conn.close()
 
 # get new data
