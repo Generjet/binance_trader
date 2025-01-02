@@ -26,36 +26,36 @@ def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
     # df['Time'] = pd.to_datetime(df['Time'], unit='ms').dt.strftime('%Y-%m-%d %H:%M')
     df.Time = pd.to_datetime(df.Time, unit='ms')
     df.set_index('Time', inplace=True)
-    print(df.tail(10))
+    # print(df.tail(10))
     return df
 
 # sqlite-aas data unshina
-DB_NAME = '../tamir_crypto_data.db'
-conn = sqlite3.connect(DB_NAME)
+# DB_NAME = '../tamir_crypto_data.db'
+# conn = sqlite3.connect(DB_NAME)
 
-# Create table if it doesn't exist
-create_table_query = """
-CREATE TABLE IF NOT EXISTS crypto_data (
-    Time DATETIME PRIMARY KEY,
-    Open REAL,
-    High REAL,
-    Low REAL,
-    Close REAL,
-    Volume REAL
-);
-"""
-conn.execute(create_table_query)
-conn.commit()
+# # Create table if it doesn't exist
+# create_table_query = """
+# CREATE TABLE IF NOT EXISTS crypto_data (
+#     Time DATETIME PRIMARY KEY,
+#     Open REAL,
+#     High REAL,
+#     Low REAL,
+#     Close REAL,
+#     Volume REAL
+# );
+# """
+# conn.execute(create_table_query)
+# conn.commit()
 
-# Try to read existing data
-try:
-    query = "SELECT * FROM crypto_data ORDER BY Time DESC LIMIT 100"
-    df = pd.read_sql_query(query, conn)
-except pd.errors.DatabaseError:
-    # If table is empty or error occurs, create empty DataFrame
-    df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'Volume'])
+# # Try to read existing data
+# try:
+#     query = "SELECT * FROM crypto_data ORDER BY Time DESC LIMIT 100"
+#     df = pd.read_sql_query(query, conn)
+# except pd.errors.DatabaseError:
+#     # If table is empty or error occurs, create empty DataFrame
+#     df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'Volume'])
 
-conn.close()
+# conn.close()
 
 # get new data
 symbol = 'ETHUSDT'
