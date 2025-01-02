@@ -57,12 +57,17 @@ def find_extremum(df):
  
  # =========== TA technical analysis ===============
 def applytechnicals(df):
-    # window for 14 days and smooth window for 3days
-    df['%K'] = ta.momentum.stoch(df.High, df.Low, df.Close, window=14, smooth_window=3)
+    # Ensure columns are numeric
+    df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].apply(pd.to_numeric)
+    
+    # Calculate technical indicators
+    df['%K'] = ta.momentum.stoch(df['High'], df['Low'], df['Close'], window=14, smooth_window=3)
     df['%D'] = df['%K'].rolling(3).mean()
-    df['rsi'] = ta.momentum.rsi(df.Close, window=14)
-    df['macd'] = ta.trend.macd_diff(df.Close)
-    df['ema'] = df.iloc[:,0].ewm(span=14,adjust=False).mean()
+    df['rsi'] = ta.momentum.rsi(df['Close'], window=14)
+    df['macd'] = ta.trend.macd_diff(df['Close'])
+    df['ema'] = df['Close'].ewm(span=14, adjust=False).mean()
+    
+    # Drop any rows with NaN values
     df.dropna(inplace=True)
     return df
 # Initialize the app ============ VIZUALIZE ============
