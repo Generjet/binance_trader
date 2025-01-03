@@ -26,6 +26,7 @@ def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
     # df['Time'] = pd.to_datetime(df['Time'], unit='ms').dt.strftime('%Y-%m-%d %H:%M')
     df.Time = pd.to_datetime(df.Time, unit='ms')
     df.set_index('Time', inplace=True)
+    df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].apply(pd.to_numeric)
     # print(df.tail(10))
     return df
 
@@ -59,37 +60,42 @@ def fetchCryptoData(symbol, timePeriod ,lookback, ago='days ago UTC'):
 
 # get new data
 symbol = 'ETHUSDT'
-timePeriod = '5m'
-lookback = '60'
+timePeriod = '4h'
+lookback = '200'
 df = fetchCryptoData(symbol, timePeriod, lookback )
 
 # =========== extremum ===============
 def find_extremum(df):
-    window = 100  # Use the last 100 data points for rolling calculation
-    # df['resistance'] = df['high'].rolling(window=window, min_periods=1).max()
-    # df['support'] = df['low'].rolling(window=window, min_periods=1).min()
-    resistances = df[df.High == df.High.rolling(10, center=True).max()].High
-    resistance_mean = resistances.max()
-    df['resistance'] = resistance_mean
-    supports = df[df.Low == df.Low.rolling(window, center=True).min()].Low
-    support_mean = supports.min()
-    df['support'] = support_mean
+    # Ensure 'High' column is numeric
+    # df['High'] = pd.to_numeric(df['High'])
+
+    # Find the last 2 maximum points of 'High'
+    max_points = df['High'].nlargest(2)
+    if len(max_points) < 2:
+        df['resistance'] = None
+        return df
+
+    # Calculate the slope
+    slope = (max_points.iloc[1] - max_points.iloc[0]) / (max_points.index[1] - max_points.index[0]).days
+
+    # Calculate the next values for 'Resistance'
+    df['resistance'] = max_points.iloc[1] + slope * (df.index - max_points.index[1]).days
+    print("extremums = ", df.tail(10))
     return df
- 
+
  # =========== TA technical analysis ===============
 def applytechnicals(df):
     # Ensure columns are numeric
     df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].apply(pd.to_numeric)
-    
     # Calculate technical indicators
     df['%K'] = ta.momentum.stoch(df['High'], df['Low'], df['Close'], window=14, smooth_window=3)
     df['%D'] = df['%K'].rolling(3).mean()
     df['rsi'] = ta.momentum.rsi(df['Close'], window=14)
     df['macd'] = ta.trend.macd_diff(df['Close'])
     df['ema'] = df['Close'].ewm(span=14, adjust=False).mean()
-    
     # Drop any rows with NaN values
     df.dropna(inplace=True)
+    print("technicals => ",df.tail(10))
     return df
 # Initialize the app ============ VIZUALIZE ============
 app = Dash()
@@ -108,7 +114,6 @@ fig = go.Figure(data=[go.Candlestick(
     low=df['Low'],
     close=df['Close']
 )])
-
 
 # App layout
 app.layout = [
