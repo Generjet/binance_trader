@@ -98,7 +98,13 @@ def applytechnicals(df):
     print("technicals => ",df.tail(10))
     return df
 # Initialize the app ============ VIZUALIZE ============
-app = Dash()
+app = Dash(__name__)
+
+# Apply a dark theme
+app.css.append_css({
+    'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
+})
+
 df = find_extremum(df)
 df = applytechnicals(df)
 print(df.tail(10))
@@ -106,7 +112,7 @@ print(df.tail(10))
 # Convert columns to numeric
 df[['Open', 'High', 'Low', 'Close']] = df[['Open', 'High', 'Low', 'Close']].apply(pd.to_numeric)
 
-# Create candlestick chart
+# Create candlestick chart with dark theme
 fig = go.Figure(data=[go.Candlestick(
     x=df.index,
     open=df['Open'],
@@ -114,14 +120,20 @@ fig = go.Figure(data=[go.Candlestick(
     low=df['Low'],
     close=df['Close']
 )])
+fig.update_layout(template='plotly_dark')
 
 # App layout
-app.layout = [
-    html.Div(children='Крипто арилжааны автомат бот 自動化'),
-    dash_table.DataTable(data=df.to_dict('records'), page_size=10),
+app.layout = html.Div(style={'backgroundColor': '#1e1e1e', 'color': '#ffffff', 'padding': '20px'}, children=[
+    html.H1(children='Крипто арилжааны автомат бот 自動化', style={'textAlign': 'center'}),
+    dash_table.DataTable(
+        data=df.to_dict('records'),
+        page_size=10,
+        style_header={'backgroundColor': '#333333', 'color': 'green'},
+        style_cell={'backgroundColor': '#1e1e1e', 'color': 'grey'}
+    ),
     dcc.Graph(figure=fig),
     dcc.Interval(id='interval-component', interval=1*1000, n_intervals=0)
-]
+])
 
 # Run the app
 if __name__ == '__main__':
