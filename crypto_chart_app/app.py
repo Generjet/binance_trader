@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 app = Flask(__name__, static_folder='static')
 CORS(app)
 
-DB_NAME = 'tamir_crypto_data.db'
+DB_NAME = '../tamir_crypto_data.db'
 
 def find_extremum(df):
     window = 100  # Use the last 100 data points for rolling calculation
