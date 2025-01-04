@@ -12,3 +12,4 @@ env/bin/python
 env/bin/python3
 env/bin/python3.9
 .aider*
+crypto-trading-system/node_modules/*
