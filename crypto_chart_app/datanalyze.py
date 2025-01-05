@@ -63,15 +63,28 @@ def apply_technicals(df):
     df.dropna(inplace=True)
     return df
 # ===================== EXECUTE =====================
-analyzed_df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'Volume'])
 symbol = 'ETHUSDT'
 timePeriod = '1h'
 lookback = 100
 df = fetchCryptoData(symbol, timePeriod, lookback)
+
+# Create a list to collect processed rows
+processed_rows = []
+
 for index, row in df.iterrows():
-    analyzed_df = pd.concat([analyzed_df, pd.DataFrame([row])])
-    analyzed_df = find_extremum(analyzed_df)
-    analyzed_df = apply_technicals(analyzed_df)
-    print(analyzed_df.tail(1))
+    # Create a single-row DataFrame
+    row_df = pd.DataFrame([row])
+    
+    # Apply transformations
+    row_df = find_extremum(row_df)
+    row_df = apply_technicals(row_df)
+    
+    # Append processed row to list
+    processed_rows.append(row_df)
+    
+    # Print the latest processed row
+    print(row_df)
     time.sleep(1)
-# print(df)
+
+# Combine all processed rows into final DataFrame
+analyzed_df = pd.concat(processed_rows)
