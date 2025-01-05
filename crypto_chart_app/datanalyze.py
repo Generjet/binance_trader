@@ -80,13 +80,15 @@ for index, row in df.iterrows():
     row_df = pd.DataFrame([row])    
     # Apply transformations
     analyzed_df = pd.concat([analyzed_df, row_df])
-    # row_df = find_extremum(row_df)
-    # row_df = apply_technicals(row_df)    
+    if len(analyzed_df) > 15:
+        analyzed_df = find_extremum(analyzed_df)
+        analyzed_df = apply_technicals(analyzed_df)    
     # # Append processed row to list
     # processed_rows.append(row_df)
     
     # Print the latest processed row
-    print("analyzed data =========> ",analyzed_df['resistance'],analyzed_df['support'])
+    print("analyzed data =========> ",analyzed_df)
+    # print("analyzed data =========> ",analyzed_df['resistance'],analyzed_df['support'])
     # print("analyzed data =========> ",row_df['resistance'],row_df['support'])
     time.sleep(1)
 
