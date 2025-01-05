@@ -22,7 +22,7 @@ def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
     df = df.iloc[:, :6]
     df.columns = ['Time', 'Open', 'High', 'Low', 'Close', 'Volume']
     df.Time = pd.to_datetime(df.Time, unit='ms')
-    df.set_index('Time', inplace=True)
+    # df.set_index('Time', inplace=True)
     df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].apply(pd.to_numeric)
     return df
 
@@ -65,21 +65,22 @@ def apply_technicals(df):
 # ===================== EXECUTE =====================
 symbol = 'ETHUSDT'
 timePeriod = '1h'
-lookback = 100
+lookback = 110
 df = fetchCryptoData(symbol, timePeriod, lookback)
-ndf = find_extremum(df)
-ndf = apply_technicals(ndf)
-print(ndf)
+# ndf = find_extremum(df)
+# ndf = apply_technicals(ndf)
+# print(ndf)
 # ============= UNTIL HERE ALL WORKS =============
 # Create a list to collect processed rows
 analyzed_df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'Volume'])
 processed_rows = []
 
 for index, row in df.iterrows():
+    print(index)
     # Create a single-row DataFrame
     row_df = pd.DataFrame([row])    
     # Apply transformations
-    analyzed_df = pd.concat([analyzed_df, row_df])
+    analyzed_df = pd.concat([analyzed_df, row_df], ignore_index=True)
     if len(analyzed_df) > 15:
         analyzed_df = find_extremum(analyzed_df)
         analyzed_df = apply_technicals(analyzed_df)    
