@@ -67,24 +67,28 @@ symbol = 'ETHUSDT'
 timePeriod = '1h'
 lookback = 100
 df = fetchCryptoData(symbol, timePeriod, lookback)
-
+ndf = find_extremum(df)
+ndf = apply_technicals(ndf)
+print(ndf)
+# ============= UNTIL HERE ALL WORKS =============
 # Create a list to collect processed rows
+analyzed_df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'Volume'])
 processed_rows = []
 
 for index, row in df.iterrows():
     # Create a single-row DataFrame
-    row_df = pd.DataFrame([row])
-    
+    row_df = pd.DataFrame([row])    
     # Apply transformations
-    row_df = find_extremum(row_df)
-    row_df = apply_technicals(row_df)
-    
-    # Append processed row to list
-    processed_rows.append(row_df)
+    analyzed_df = analyzed_df.append(row_df)
+    # row_df = find_extremum(row_df)
+    # row_df = apply_technicals(row_df)    
+    # # Append processed row to list
+    # processed_rows.append(row_df)
     
     # Print the latest processed row
-    print(row_df)
+    print("analyzed data =========> ",analyzed_df['resistance'],analyzed_df['support'])
+    # print("analyzed data =========> ",row_df['resistance'],row_df['support'])
     time.sleep(1)
 
 # Combine all processed rows into final DataFrame
-analyzed_df = pd.concat(processed_rows)
+# analyzed_df = pd.concat(processed_rows)
