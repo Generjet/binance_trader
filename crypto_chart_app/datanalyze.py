@@ -79,7 +79,7 @@ for index, row in df.iterrows():
     # Create a single-row DataFrame
     row_df = pd.DataFrame([row])    
     # Apply transformations
-    analyzed_df = analyzed_df.append(row_df)
+    analyzed_df = pd.concat([analyzed_df, row_df])
     # row_df = find_extremum(row_df)
     # row_df = apply_technicals(row_df)    
     # # Append processed row to list
