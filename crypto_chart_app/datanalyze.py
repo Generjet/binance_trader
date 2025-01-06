@@ -3,27 +3,38 @@ import ta
 import os
 import time
 import sys
-from binance.client import Client
+import yfinance as yf
 import sqlite3
 import plotly.graph_objects as go
 
 DB_NAME = '../tamir_crypto_data.db'
 
-api_key = os.getenv('binance_key')
-api_secret = os.getenv('binance_secret')
-client = Client(api_key, api_secret)
-print(client.get_account())
-# sys.exit()
-
 
 def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
-    lookback_str = str(lookback) + ' ' + ago
-    df = pd.DataFrame(client.get_historical_klines(symbol, timePeriod, lookback_str))
-    df = df.iloc[:, :6]
-    df.columns = ['Time', 'Open', 'High', 'Low', 'Close', 'Volume']
-    df.Time = pd.to_datetime(df.Time, unit='ms')
-    # df.set_index('Time', inplace=True)
-    df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].apply(pd.to_numeric)
+    # Convert Binance-like period to yfinance interval
+    interval_map = {
+        '1h': '1h',
+        '1d': '1d',
+        '1m': '1m',
+        '5m': '5m',
+        '15m': '15m'
+    }
+    
+    # Get data from yfinance
+    ticker = yf.Ticker(symbol)
+    df = ticker.history(period=f"{lookback}d", interval=interval_map.get(timePeriod, '1h'))
+    
+    # Reset index and rename columns to match existing code
+    df = df.reset_index()
+    df.rename(columns={
+        'Datetime': 'Time',
+        'Open': 'Open',
+        'High': 'High',
+        'Low': 'Low',
+        'Close': 'Close',
+        'Volume': 'Volume'
+    }, inplace=True)
+    
     return df
 
 def find_extremum(df):
