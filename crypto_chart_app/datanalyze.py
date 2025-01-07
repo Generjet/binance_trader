@@ -5,35 +5,38 @@ import time
 import sys
 import yfinance as yf
 import sqlite3
+from binance.client import Client
 import plotly.graph_objects as go
 
 DB_NAME = '../tamir_crypto_data.db'
 
 
 def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
-    # Convert Binance-like period to yfinance interval
-    interval_map = {
-        '1h': '1h',
-        '1d': '1d',
-        '1m': '1m',
-        '5m': '5m',
-        '15m': '15m'
-    }
+    # Initialize Binance client (use your API keys if you have them)
+    client = Client()
     
-    # Get data from yfinance
-    ticker = yf.Ticker(symbol)
-    df = ticker.history(period=f"{lookback}d", interval=interval_map.get(timePeriod, '1h'))
+    # Get historical klines/candlestick data
+    klines = client.get_historical_klines(
+        symbol=symbol,
+        interval=timePeriod,
+        limit=lookback
+    )
     
-    # Reset index and rename columns to match existing code
-    df = df.reset_index()
-    df.rename(columns={
-        'Datetime': 'Time',
-        'Open': 'Open',
-        'High': 'High',
-        'Low': 'Low',
-        'Close': 'Close',
-        'Volume': 'Volume'
-    }, inplace=True)
+    # Create DataFrame
+    df = pd.DataFrame(klines, columns=[
+        'Time', 'Open', 'High', 'Low', 'Close', 'Volume',
+        'Close_time', 'Quote_asset_volume', 'Number_of_trades',
+        'Taker_buy_base', 'Taker_buy_quote', 'Ignore'
+    ])
+    
+    # Convert string values to float
+    df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].astype(float)
+    
+    # Convert timestamp to datetime
+    df['Time'] = pd.to_datetime(df['Time'], unit='ms')
+    
+    # Keep only necessary columns
+    df = df[['Time', 'Open', 'High', 'Low', 'Close', 'Volume']]
     
     return df
 
@@ -90,7 +93,9 @@ for index, row in df.iterrows():
     # Create a single-row DataFrame
     row_df = pd.DataFrame([row])
     # Append using concat
-    analyzed_df = pd.concat([analyzed_df, row_df], ignore_index=True)
+    # analyzed_df = pd.concat([analyzed_df, row_df], ignore_index=True)
+    # Update analyzed_df with all data up to current index
+    analyzed_df = df.iloc[0:index+1].copy()
     if len(analyzed_df) > 15:
         analyzed_df = find_extremum(analyzed_df)
         analyzed_df = apply_technicals(analyzed_df)    
