@@ -8,6 +8,7 @@ import sqlite3
 from binance.client import Client
 import plotly.graph_objects as go
 import numpy as np
+from tabulate import tabulate
 
 DB_NAME = '../tamir_crypto_data.db'
 
@@ -109,10 +110,11 @@ for index, row in df.iterrows():
     analyzed_df['stochastic-K'] = np.nan
     if len(analyzed_df) > 15:
         analyzed_df = find_extremum(analyzed_df, window=10)
-        # analyzed_df = apply_technicals(analyzed_df)      
+        analyzed_df = apply_technicals(analyzed_df)      
     # Print the latest processed row
     print("analyzed data INDEX =========> ",index, " row: ",row)
     print("analyzed data =========> ",analyzed_df)
+    print(tabulate(analyzed_df.tail(), headers='keys', tablefmt='psql', showindex=True, floatfmt=".4f"))
     # print("analyzed data =========> ",row_df['resistance'],row_df['support'])
     time.sleep(1)
 
