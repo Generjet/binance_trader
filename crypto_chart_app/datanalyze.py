@@ -84,13 +84,12 @@ df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTIL HERE ALL WORKS =============
 # Create a list to collect processed rows
 analyzed_df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'Volume'])
-processed_rows = []
 
 for index, row in df.iterrows():
     print(index)
     # Create a single-row DataFrame
-    row_df = pd.DataFrame([row])    
-    # Apply transformations
+    row_df = pd.DataFrame([row])
+    # Append using concat
     analyzed_df = pd.concat([analyzed_df, row_df], ignore_index=True)
     if len(analyzed_df) > 15:
         analyzed_df = find_extremum(analyzed_df)
