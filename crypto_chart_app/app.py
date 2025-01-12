@@ -49,20 +49,68 @@ def index():
             decreasing_line_color='red'
         )])
 
+        # Add EMA, resistance, and support to the candlestick chart
+        fig.add_trace(go.Scatter(x=df['time'], y=df['ema'], mode='lines', name='EMA', line=dict(color='blue')))
+        fig.add_trace(go.Scatter(x=df['time'], y=df['resistance'], mode='lines', name='Resistance', line=dict(color='orange', dash='dash')))
+        fig.add_trace(go.Scatter(x=df['time'], y=df['support'], mode='lines', name='Support', line=dict(color='purple', dash='dash')))
+
         fig.update_layout(
             template='plotly_dark',
             xaxis_rangeslider_visible=False,
             title='Crypto Price Data',
-            yaxis_title='Price',
-            xaxis_title='Time'
+            yaxis=dict(title='Price'),
+            xaxis=dict(title='Time')
         )
 
         chart_html = fig.to_html(full_html=False)
+
+        # Create volume chart
+        volume_fig = go.Figure(data=[go.Bar(x=df['time'], y=df['volume'], name='Volume')])
+        volume_fig.update_layout(
+            template='plotly_dark',
+            title='Volume',
+            yaxis=dict(title='Volume'),
+            xaxis=dict(title='Time')
+        )
+        volume_chart_html = volume_fig.to_html(full_html=False)
+
+        # Create MACD chart
+        macd_fig = go.Figure(data=[go.Scatter(x=df['time'], y=df['macd'], mode='lines', name='MACD', line=dict(color='cyan'))])
+        macd_fig.update_layout(
+            template='plotly_dark',
+            title='MACD',
+            yaxis=dict(title='MACD'),
+            xaxis=dict(title='Time')
+        )
+        macd_chart_html = macd_fig.to_html(full_html=False)
+
+        # Create RSI chart
+        rsi_fig = go.Figure(data=[go.Scatter(x=df['time'], y=df['rsi'], mode='lines', name='RSI', line=dict(color='magenta'))])
+        rsi_fig.update_layout(
+            template='plotly_dark',
+            title='RSI',
+            yaxis=dict(title='RSI'),
+            xaxis=dict(title='Time')
+        )
+        rsi_chart_html = rsi_fig.to_html(full_html=False)
+
+        # Create Stochastic chart
+        stochastic_fig = go.Figure()
+        stochastic_fig.add_trace(go.Scatter(x=df['time'], y=df['stochastic_K'], mode='lines', name='Stochastic %K', line=dict(color='yellow')))
+        stochastic_fig.add_trace(go.Scatter(x=df['time'], y=df['stochastic_D'], mode='lines', name='Stochastic %D', line=dict(color='red')))
+        stochastic_fig.update_layout(
+            template='plotly_dark',
+            title='Stochastic',
+            yaxis=dict(title='Stochastic'),
+            xaxis=dict(title='Time')
+        )
+        stochastic_chart_html = stochastic_fig.to_html(full_html=False)
+
         table_html = df.head(30).to_html(classes='data', index=False, border=0)
 
         latest_data = df.iloc[0].to_dict() if not df.empty else {}
 
-        return render_template('index.html', chart_html=chart_html, table_data=table_html, latest_data=latest_data, df=df)
+        return render_template('index.html', chart_html=chart_html, volume_chart_html=volume_chart_html, macd_chart_html=macd_chart_html, rsi_chart_html=rsi_chart_html, stochastic_chart_html=stochastic_chart_html, table_data=table_html, latest_data=latest_data, df=df)
 
 @socketio.on('connect')
 def handle_connect():

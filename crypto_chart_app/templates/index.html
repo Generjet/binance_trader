@@ -81,7 +81,7 @@
             });
 
             function updateChart(data) {
-                const trace = {
+                const candlestick = {
                     x: data.map(d => d.time),
                     open: data.map(d => d.open),
                     high: data.map(d => d.high),
@@ -92,7 +92,77 @@
                     decreasing: { line: { color: 'red' } }
                 };
 
-                const layout = {
+                const ema = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.ema),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'EMA',
+                    line: { color: 'blue' }
+                };
+
+                const resistance = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.resistance),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Resistance',
+                    line: { color: 'orange', dash: 'dash' }
+                };
+
+                const support = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.support),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Support',
+                    line: { color: 'purple', dash: 'dash' }
+                };
+
+                const volume = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.volume),
+                    type: 'bar',
+                    name: 'Volume'
+                };
+
+                const macd = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.macd),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'MACD',
+                    line: { color: 'cyan' }
+                };
+
+                const rsi = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.rsi),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'RSI',
+                    line: { color: 'magenta' }
+                };
+
+                const stochasticK = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.stochastic_K),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Stochastic %K',
+                    line: { color: 'yellow' }
+                };
+
+                const stochasticD = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.stochastic_D),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Stochastic %D',
+                    line: { color: 'red' }
+                };
+
+                const layoutCandlestick = {
                     template: 'plotly_dark',
                     xaxis: { rangeslider: { visible: false } },
                     title: 'Crypto Price Data',
@@ -100,7 +170,39 @@
                     xaxis: { title: 'Time' }
                 };
 
-                Plotly.newPlot('chart', [trace], layout);
+                const layoutVolume = {
+                    template: 'plotly_dark',
+                    title: 'Volume',
+                    yaxis: { title: 'Volume' },
+                    xaxis: { title: 'Time' }
+                };
+
+                const layoutMACD = {
+                    template: 'plotly_dark',
+                    title: 'MACD',
+                    yaxis: { title: 'MACD' },
+                    xaxis: { title: 'Time' }
+                };
+
+                const layoutRSI = {
+                    template: 'plotly_dark',
+                    title: 'RSI',
+                    yaxis: { title: 'RSI' },
+                    xaxis: { title: 'Time' }
+                };
+
+                const layoutStochastic = {
+                    template: 'plotly_dark',
+                    title: 'Stochastic',
+                    yaxis: { title: 'Stochastic' },
+                    xaxis: { title: 'Time' }
+                };
+
+                Plotly.newPlot('chart', [candlestick, ema, resistance, support], layoutCandlestick);
+                Plotly.newPlot('volume-chart', [volume], layoutVolume);
+                Plotly.newPlot('macd-chart', [macd], layoutMACD);
+                Plotly.newPlot('rsi-chart', [rsi], layoutRSI);
+                Plotly.newPlot('stochastic-chart', [stochasticK, stochasticD], layoutStochastic);
             }
 
             function updateTable(data, page, rowsPerPage) {
@@ -162,6 +264,10 @@
         <p>Close: <span id="latest-close">{{ latest_data.get('close', 'N/A') }}</span></p>
     </div>
     <div id="chart" data-chart-data='{{ df.to_dict(orient="records")|tojson|replace("NaN", "null") }}'></div>
+    <div id="volume-chart"></div>
+    <div id="macd-chart"></div>
+    <div id="rsi-chart"></div>
+    <div id="stochastic-chart"></div>
     <div id="table" data-table-data='{{ df.to_dict(orient="records")|tojson|replace("NaN", "null") }}'></div>
     <div class="pagination">
         <button id="prevPage">Previous</button>
