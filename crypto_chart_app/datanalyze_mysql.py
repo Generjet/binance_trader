@@ -81,7 +81,7 @@ def apply_technicals(df):
         # Calculate EMA
         df_tech['ema'] = df_tech['close'].ewm(span=14, adjust=False).mean()
         # Fill NaN values with previous values
-        df_tech = df_tech.fillna(method='ffill')
+        df_tech = df_tech.ffill()
     except Exception as e:
         print(f"Error in technical analysis: {e}")
         return df
