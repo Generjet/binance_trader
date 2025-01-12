@@ -31,11 +31,134 @@
         .data td {
             color: #00ff00;
         }
+        .latest-data {
+            margin-bottom: 20px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .pagination button:hover {
+            background-color: #444;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io();
+            let currentPage = 1;
+            const rowsPerPage = 30;
+
+            socket.on('new_data', (data) => {
+                document.getElementById('latest-open').innerText = data.open;
+                document.getElementById('latest-high').innerText = data.high;
+                document.getElementById('latest-low').innerText = data.low;
+                document.getElementById('latest-close').innerText = data.close;
+
+                // Update chart
+                const chartDiv = document.getElementById('chart');
+                const chartData = JSON.parse(chartDiv.dataset.chartData);
+                chartData.unshift(data);
+                chartDiv.dataset.chartData = JSON.stringify(chartData);
+                updateChart(chartData);
+
+                // Update table
+                const tableDiv = document.getElementById('table');
+                const tableData = JSON.parse(tableDiv.dataset.tableData);
+                tableData.unshift(data);
+                tableDiv.dataset.tableData = JSON.stringify(tableData);
+                updateTable(tableData, currentPage, rowsPerPage);
+            });
+
+            function updateChart(data) {
+                const trace = {
+                    x: data.map(d => d.time),
+                    open: data.map(d => d.open),
+                    high: data.map(d => d.high),
+                    low: data.map(d => d.low),
+                    close: data.map(d => d.close),
+                    type: 'candlestick',
+                    increasing: { line: { color: 'green' } },
+                    decreasing: { line: { color: 'red' } }
+                };
+
+                const layout = {
+                    template: 'plotly_dark',
+                    xaxis: { rangeslider: { visible: false } },
+                    title: 'Crypto Price Data',
+                    yaxis: { title: 'Price' },
+                    xaxis: { title: 'Time' }
+                };
+
+                Plotly.newPlot('chart', [trace], layout);
+            }
+
+            function updateTable(data, page, rowsPerPage) {
+                const tableDiv = document.getElementById('table');
+                const start = (page - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                const paginatedData = data.slice(start, end);
+
+                let tableHtml = '<table class="data"><thead><tr>';
+                tableHtml += '<th>Time</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th>';
+                tableHtml += '</tr></thead><tbody>';
+
+                paginatedData.forEach(row => {
+                    tableHtml += `<tr>
+                        <td>${row.time}</td>
+                        <td>${row.open}</td>
+                        <td>${row.high}</td>
+                        <td>${row.low}</td>
+                        <td>${row.close}</td>
+                        <td>${row.volume}</td>
+                    </tr>`;
+                });
+
+                tableHtml += '</tbody></table>';
+                tableDiv.innerHTML = tableHtml;
+            }
+
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    const tableData = JSON.parse(document.getElementById('table').dataset.tableData);
+                    updateTable(tableData, currentPage, rowsPerPage);
+                }
+            });
+
+            document.getElementById('nextPage').addEventListener('click', () => {
+                const tableData = JSON.parse(document.getElementById('table').dataset.tableData);
+                if (currentPage * rowsPerPage < tableData.length) {
+                    currentPage++;
+                    updateTable(tableData, currentPage, rowsPerPage);
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <h1>Crypto Price Data</h1>
-    <div id="chart">{{ chart_html|safe }}</div>
-    <div id="table">{{ table_data|safe }}</div>
+    <div class="latest-data">
+        <p>Latest Data:</p>
+        <p>Open: <span id="latest-open">{{ latest_data.get('open', 'N/A') }}</span></p>
+        <p>High: <span id="latest-high">{{ latest_data.get('high', 'N/A') }}</span></p>
+        <p>Low: <span id="latest-low">{{ latest_data.get('low', 'N/A') }}</span></p>
+        <p>Close: <span id="latest-close">{{ latest_data.get('close', 'N/A') }}</span></p>
+    </div>
+    <div id="chart" data-chart-data='{{ latest_data|tojson }}'></div>
+    <div id="table" data-table-data='{{ latest_data|tojson }}'></div>
+    <div class="pagination">
+        <button id="prevPage">Previous</button>
+        <button id="nextPage">Next</button>
+    </div>
 </body>
 </html>
