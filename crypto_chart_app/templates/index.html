@@ -52,6 +52,7 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const socket = io();
@@ -142,6 +143,12 @@
                     updateTable(tableData, currentPage, rowsPerPage);
                 }
             });
+
+            // Initial chart and table setup
+            const initialChartData = JSON.parse(document.getElementById('chart').dataset.chartData);
+            updateChart(initialChartData);
+            const initialTableData = JSON.parse(document.getElementById('table').dataset.tableData);
+            updateTable(initialTableData, currentPage, rowsPerPage);
         });
     </script>
 </head>
@@ -154,8 +161,8 @@
         <p>Low: <span id="latest-low">{{ latest_data.get('low', 'N/A') }}</span></p>
         <p>Close: <span id="latest-close">{{ latest_data.get('close', 'N/A') }}</span></p>
     </div>
-    <div id="chart" data-chart-data='{{ latest_data|tojson }}'></div>
-    <div id="table" data-table-data='{{ latest_data|tojson }}'></div>
+    <div id="chart" data-chart-data='{{ df.to_dict(orient="records")|tojson }}'></div>
+    <div id="table" data-table-data='{{ df.to_dict(orient="records")|tojson }}'></div>
     <div class="pagination">
         <button id="prevPage">Previous</button>
         <button id="nextPage">Next</button>

@@ -62,7 +62,7 @@ def index():
 
         latest_data = df.iloc[0].to_dict() if not df.empty else {}
 
-        return render_template('index.html', chart_html=chart_html, table_data=table_html, latest_data=latest_data)
+        return render_template('index.html', chart_html=chart_html, table_data=table_html, latest_data=latest_data, df=df)
 
 @socketio.on('connect')
 def handle_connect():
@@ -71,27 +71,6 @@ def handle_connect():
 @socketio.on('disconnect')
 def handle_disconnect():
     print('Client disconnected')
-
-def emit_latest_data():
-    with app.app_context():
-        latest_data = AnalyzedData.query.order_by(AnalyzedData.time.desc()).first()
-        if latest_data:
-            data = {
-                'time': latest_data.time,
-                'open': latest_data.open,
-                'high': latest_data.high,
-                'low': latest_data.low,
-                'close': latest_data.close,
-                'volume': latest_data.volume,
-                'resistance': latest_data.resistance,
-                'support': latest_data.support,
-                'macd': latest_data.macd,
-                'rsi': latest_data.rsi,
-                'ema': latest_data.ema,
-                'stochastic_D': latest_data.stochastic_D,
-                'stochastic_K': latest_data.stochastic_K
-            }
-            socketio.emit('new_data', data)
 
 def check_for_new_data():
     last_time = None
@@ -116,7 +95,7 @@ def check_for_new_data():
                     'stochastic_K': latest_data.stochastic_K
                 }
                 socketio.emit('new_data', data)
-        time.sleep(5)
+        time.sleep(2)
 
 if __name__ == '__main__':
     socketio.start_background_task(check_for_new_data)

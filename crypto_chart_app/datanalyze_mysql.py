@@ -113,4 +113,4 @@ for index, row in df.iterrows():
     create_database_if_not_exists()
     print("Database created")
     update_db(row)
-    time.sleep(1)
+    time.sleep(4)
