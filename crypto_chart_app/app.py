@@ -52,25 +52,38 @@ def index():
         # Add EMA, resistance, and support to the candlestick chart
         fig.add_trace(go.Scatter(x=df['time'], y=df['ema'], mode='lines', name='EMA', line=dict(color='blue')))
         fig.add_trace(go.Scatter(x=df['time'], y=df['resistance'], mode='lines', name='Resistance', line=dict(color='orange', dash='dash')))
-        fig.add_trace(go.Scatter(x=df['time'], y=df['support'], mode='lines', name='Support', line=dict(color='purple', dash='dash')))
+        fig.add_trace(go.Scatter(x=df['time'], y=df['support'], mode='lines', name='Support', line=dict(color='red', dash='dash')))
 
         fig.update_layout(
             template='plotly_dark',
             xaxis_rangeslider_visible=False,
             title='Crypto Price Data',
-            yaxis=dict(title='Price'),
-            xaxis=dict(title='Time')
+            yaxis=dict(title='Price', color='white'),
+            xaxis=dict(title='Time', color='white'),
+            plot_bgcolor='black',
+            paper_bgcolor='black',
+            font=dict(color='white'),
+            legend=dict(font=dict(color='white'))
         )
 
         chart_html = fig.to_html(full_html=False)
 
         # Create volume chart
-        volume_fig = go.Figure(data=[go.Bar(x=df['time'], y=df['volume'], name='Volume')])
+        volume_fig = go.Figure(data=[go.Bar(
+            x=df['time'],
+            y=df['volume'],
+            name='Volume',
+            marker=dict(color=df.apply(lambda row: 'green' if row['close'] > row['open'] else 'red', axis=1))
+        )])
         volume_fig.update_layout(
             template='plotly_dark',
             title='Volume',
-            yaxis=dict(title='Volume'),
-            xaxis=dict(title='Time')
+            yaxis=dict(title='Volume', color='white'),
+            xaxis=dict(title='Time', color='white'),
+            plot_bgcolor='black',
+            paper_bgcolor='black',
+            font=dict(color='white'),
+            legend=dict(font=dict(color='white'))
         )
         volume_chart_html = volume_fig.to_html(full_html=False)
 
@@ -79,8 +92,17 @@ def index():
         macd_fig.update_layout(
             template='plotly_dark',
             title='MACD',
-            yaxis=dict(title='MACD'),
-            xaxis=dict(title='Time')
+            yaxis=dict(title='MACD', color='white'),
+            xaxis=dict(title='Time', color='white'),
+            shapes=[
+                { 'type': 'line', 'x0': 0, 'x1': 1, 'y0': 20, 'y1': 20, 'xref': 'paper', 'yref': 'y', 'line': { 'color': 'red', 'dash': 'dash' } },
+                { 'type': 'line', 'x0': 0, 'x1': 1, 'y0': 80, 'y1': 80, 'xref': 'paper', 'yref': 'y', 'line': { 'color': 'red', 'dash': 'dash' } },
+                { 'type': 'line', 'x0': 0, 'x1': 1, 'y0': 0, 'y1': 0, 'xref': 'paper', 'yref': 'y', 'line': { 'color': 'white', 'dash': 'dash' } }
+            ],
+            plot_bgcolor='black',
+            paper_bgcolor='black',
+            font=dict(color='white'),
+            legend=dict(font=dict(color='white'))
         )
         macd_chart_html = macd_fig.to_html(full_html=False)
 
@@ -89,8 +111,16 @@ def index():
         rsi_fig.update_layout(
             template='plotly_dark',
             title='RSI',
-            yaxis=dict(title='RSI'),
-            xaxis=dict(title='Time')
+            yaxis=dict(title='RSI', color='white'),
+            xaxis=dict(title='Time', color='white'),
+            shapes=[
+                { 'type': 'line', 'x0': 0, 'x1': 1, 'y0': 20, 'y1': 20, 'xref': 'paper', 'yref': 'y', 'line': { 'color': 'red', 'dash': 'dash' } },
+                { 'type': 'line', 'x0': 0, 'x1': 1, 'y0': 80, 'y1': 80, 'xref': 'paper', 'yref': 'y', 'line': { 'color': 'red', 'dash': 'dash' } }
+            ],
+            plot_bgcolor='black',
+            paper_bgcolor='black',
+            font=dict(color='white'),
+            legend=dict(font=dict(color='white'))
         )
         rsi_chart_html = rsi_fig.to_html(full_html=False)
 
@@ -101,8 +131,16 @@ def index():
         stochastic_fig.update_layout(
             template='plotly_dark',
             title='Stochastic',
-            yaxis=dict(title='Stochastic'),
-            xaxis=dict(title='Time')
+            yaxis=dict(title='Stochastic', color='white'),
+            xaxis=dict(title='Time', color='white'),
+            shapes=[
+                { 'type': 'line', 'x0': 0, 'x1': 1, 'y0': 20, 'y1': 20, 'xref': 'paper', 'yref': 'y', 'line': { 'color': 'red', 'dash': 'dash' } },
+                { 'type': 'line', 'x0': 0, 'x1': 1, 'y0': 80, 'y1': 80, 'xref': 'paper', 'yref': 'y', 'line': { 'color': 'red', 'dash': 'dash' } }
+            ],
+            plot_bgcolor='black',
+            paper_bgcolor='black',
+            font=dict(color='white'),
+            legend=dict(font=dict(color='white'))
         )
         stochastic_chart_html = stochastic_fig.to_html(full_html=False)
 

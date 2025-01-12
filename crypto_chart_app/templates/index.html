@@ -116,14 +116,17 @@
                     type: 'scatter',
                     mode: 'lines',
                     name: 'Support',
-                    line: { color: 'purple', dash: 'dash' }
+                    line: { color: 'red', dash: 'dash' }
                 };
 
                 const volume = {
                     x: data.map(d => d.time),
                     y: data.map(d => d.volume),
                     type: 'bar',
-                    name: 'Volume'
+                    name: 'Volume',
+                    marker: {
+                        color: data.map(d => d.close > d.open ? 'green' : 'red')
+                    }
                 };
 
                 const macd = {
@@ -166,36 +169,69 @@
                     template: 'plotly_dark',
                     xaxis: { rangeslider: { visible: false } },
                     title: 'Crypto Price Data',
-                    yaxis: { title: 'Price' },
-                    xaxis: { title: 'Time' }
+                    yaxis: { title: 'Price', color: 'white' },
+                    xaxis: { title: 'Time', color: 'white' },
+                    plot_bgcolor: 'black',
+                    paper_bgcolor: 'black',
+                    font: { color: 'white' },
+                    legend: { font: { color: 'white' } }
                 };
 
                 const layoutVolume = {
                     template: 'plotly_dark',
                     title: 'Volume',
-                    yaxis: { title: 'Volume' },
-                    xaxis: { title: 'Time' }
+                    yaxis: { title: 'Volume', color: 'white' },
+                    xaxis: { title: 'Time', color: 'white' },
+                    plot_bgcolor: 'black',
+                    paper_bgcolor: 'black',
+                    font: { color: 'white' },
+                    legend: { font: { color: 'white' } }
                 };
 
                 const layoutMACD = {
                     template: 'plotly_dark',
                     title: 'MACD',
-                    yaxis: { title: 'MACD' },
-                    xaxis: { title: 'Time' }
+                    yaxis: { title: 'MACD', color: 'white' },
+                    xaxis: { title: 'Time', color: 'white' },
+                    shapes: [
+                        { type: 'line', x0: 0, x1: 1, y0: 20, y1: 20, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } },
+                        { type: 'line', x0: 0, x1: 1, y0: 80, y1: 80, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } },
+                        { type: 'line', x0: 0, x1: 1, y0: 0, y1: 0, xref: 'paper', yref: 'y', line: { color: 'white', dash: 'dash' } }
+                    ],
+                    plot_bgcolor: 'black',
+                    paper_bgcolor: 'black',
+                    font: { color: 'white' },
+                    legend: { font: { color: 'white' } }
                 };
 
                 const layoutRSI = {
                     template: 'plotly_dark',
                     title: 'RSI',
-                    yaxis: { title: 'RSI' },
-                    xaxis: { title: 'Time' }
+                    yaxis: { title: 'RSI', color: 'white' },
+                    xaxis: { title: 'Time', color: 'white' },
+                    shapes: [
+                        { type: 'line', x0: 0, x1: 1, y0: 20, y1: 20, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } },
+                        { type: 'line', x0: 0, x1: 1, y0: 80, y1: 80, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } }
+                    ],
+                    plot_bgcolor: 'black',
+                    paper_bgcolor: 'black',
+                    font: { color: 'white' },
+                    legend: { font: { color: 'white' } }
                 };
 
                 const layoutStochastic = {
                     template: 'plotly_dark',
                     title: 'Stochastic',
-                    yaxis: { title: 'Stochastic' },
-                    xaxis: { title: 'Time' }
+                    yaxis: { title: 'Stochastic', color: 'white' },
+                    xaxis: { title: 'Time', color: 'white' },
+                    shapes: [
+                        { type: 'line', x0: 0, x1: 1, y0: 20, y1: 20, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } },
+                        { type: 'line', x0: 0, x1: 1, y0: 80, y1: 80, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } }
+                    ],
+                    plot_bgcolor: 'black',
+                    paper_bgcolor: 'black',
+                    font: { color: 'white' },
+                    legend: { font: { color: 'white' } }
                 };
 
                 Plotly.newPlot('chart', [candlestick, ema, resistance, support], layoutCandlestick);
