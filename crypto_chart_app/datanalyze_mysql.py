@@ -38,10 +38,10 @@ def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
     df['time'] = pd.to_datetime(df['time'], unit='ms')
     df.to_csv('data/crypto_price.csv', index=False)
     # Keep only necessary columns
-    df = df[['time', 'open', 'high', 'low', 'close', 'volume']]    
+    df = df[['time', 'open', 'high', 'low', 'close', 'volume']]
     return df
 
-def find_extremum(df, window=10):
+def find_extremum(df, window=4):
     # print("GOT data for finding EXTREMUMS: ",df)
     # resistances = df[df.high == df.high.rolling(window, center=True).max()].dropna().high
     resistances = df[df.high == df.high.rolling(window, center=True).max()].high
@@ -51,7 +51,7 @@ def find_extremum(df, window=10):
     supports = df[df.low == df.low.rolling(window, center=True).min()].low
     support_mean = supports.min()
     df['support'] = support_mean
-    # print("AFTER EXTREMUMS: ",df)
+    print("AFTER EXTREMUMS: ",df)
     return df
 
 def is_bullish_doji(candle):
@@ -90,27 +90,24 @@ def apply_technicals(df):
 # ===================== EXECUTE =====================
 symbol = 'ETHUSDT'
 timePeriod = '1h'
-lookback = 100
+lookback = 600
 df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTIL HERE ALL WORKS =============
 # Create a list to collect processed rows
 analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume'])
-analyzed_df['resistance'] = np.nan
-analyzed_df['support'] = np.nan
-analyzed_df['macd'] = np.nan
-analyzed_df['rsi'] = np.nan
-analyzed_df['ema'] = np.nan
-analyzed_df['stochastic-D'] = np.nan
-analyzed_df['stochastic-K'] = np.nan
-print(df.tail(10))
+
 for index, row in df.iterrows():
     analyzed_df = df.iloc[0:index+1].copy()
-    print("analyzed data =========> ",analyzed_df)
-
+    # print("analyzed data =========> ",analyzed_df)
+    if len(analyzed_df) > 4:
+        analyzed_df = find_extremum(analyzed_df, 4)
     if len(analyzed_df) > 15:
-        analyzed_df = find_extremum(analyzed_df, window=10)
-        analyzed_df = apply_technicals(analyzed_df)      
+        analyzed_df = apply_technicals(analyzed_df)
+        print("\nAnalyzed data after technicals:")
+    print(tabulate(analyzed_df.tail(), headers='keys', tablefmt='psql', floatfmt='.4f'))
     create_database_if_not_exists()
     print("Database created")
-    update_db(row)
-    time.sleep(4)
+    # update_db(row)
+    latest_row = analyzed_df.iloc[-1]
+    update_db(latest_row)
+    time.sleep(2)
