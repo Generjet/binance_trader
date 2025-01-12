@@ -10,28 +10,12 @@ from binance.client import Client
 import plotly.graph_objects as go
 import numpy as np
 from tabulate import tabulate
-from save2mysql import create_database_if_not_exists, update_db
+from save2mysql import create_database_if_not_exists, update_db, db, AnalyzedData
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Tamir4578@localhost/portalblog_dev'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-class AnalyzedData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.String(255))
-    open = db.Column(db.Float)
-    high = db.Column(db.Float)
-    low = db.Column(db.Float)
-    close = db.Column(db.Float)
-    volume = db.Column(db.Float)
-    resistance = db.Column(db.Float)
-    support = db.Column(db.Float)
-    macd = db.Column(db.Float)
-    rsi = db.Column(db.Float)
-    ema = db.Column(db.Float)
-    stochastic_D = db.Column(db.Float)
-    stochastic_K = db.Column(db.Float)
+db.init_app(app)
 
 def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
     # Initialize Binance client (use your API keys if you have them)
