@@ -10,6 +10,9 @@ from binance.client import Client
 import plotly.graph_objects as go
 import numpy as np
 from tabulate import tabulate
+import pymysql
+from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Tamir4578@localhost/portalblog_dev'
@@ -33,11 +36,26 @@ class AnalyzedData(db.Model):
     stochastic_K = db.Column(db.Float)
 
 def create_database_if_not_exists():
+    # Connect to MySQL server without specifying a database
+    connection = pymysql.connect(
+        host='localhost',
+        user='root',
+        password='Tamir4578'
+    )
+    cursor = connection.cursor()
+    cursor.execute("CREATE DATABASE IF NOT EXISTS portalblog_dev")
+    cursor.close()
+    connection.close()
+
+    # Create tables if they do not exist
     with app.app_context():
         db.create_all()
 
 def update_db(row):
     with app.app_context():
+        # Replace NaN values with None
+        row = {key: (None if pd.isna(value) else value) for key, value in row.items()}
+        
         analyzed_data = AnalyzedData(
             time=row['time'],
             open=row['open'],
@@ -45,13 +63,13 @@ def update_db(row):
             low=row['low'],
             close=row['close'],
             volume=row['volume'],
-            resistance=row.get('resistance', np.nan),
-            support=row.get('support', np.nan),
-            macd=row.get('macd', np.nan),
-            rsi=row.get('rsi', np.nan),
-            ema=row.get('ema', np.nan),
-            stochastic_D=row.get('stochastic-D', np.nan),
-            stochastic_K=row.get('stochastic-K', np.nan)
+            resistance=row.get('resistance', None),
+            support=row.get('support', None),
+            macd=row.get('macd', None),
+            rsi=row.get('rsi', None),
+            ema=row.get('ema', None),
+            stochastic_D=row.get('stochastic-D', None),
+            stochastic_K=row.get('stochastic-K', None)
         )
         db.session.add(analyzed_data)
         db.session.commit()
