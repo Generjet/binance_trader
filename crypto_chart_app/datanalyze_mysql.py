@@ -1,52 +1,61 @@
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 import ta
 import os
 import time
 import sys
 import yfinance as yf
-import sqlite3
 from binance.client import Client
 import plotly.graph_objects as go
 import numpy as np
 from tabulate import tabulate
-import sqlite3
-import mysql.connector
 
-# DB_NAME = '../tamir_crypto_data.db'
-DB_NAME = '../../../elixir-projects/portalblog/portalblog_dev.db'
-def save_data(row):
-    # Convert the 'time' column to string if it's not already
-    row['time'] = str(row['time'])
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Tamir4578@localhost/portalblog_dev'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-    conn = sqlite3.connect('crypto_data.db')
-    cursor = conn.cursor()
+class AnalyzedData(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    time = db.Column(db.String(255))
+    open = db.Column(db.Float)
+    high = db.Column(db.Float)
+    low = db.Column(db.Float)
+    close = db.Column(db.Float)
+    volume = db.Column(db.Float)
+    resistance = db.Column(db.Float)
+    support = db.Column(db.Float)
+    macd = db.Column(db.Float)
+    rsi = db.Column(db.Float)
+    ema = db.Column(db.Float)
+    stochastic_D = db.Column(db.Float)
+    stochastic_K = db.Column(db.Float)
 
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS analyzed_data (
-        time TEXT,
-        open REAL,
-        high REAL,
-        low REAL,
-        close REAL,
-        volume REAL,
-        resistance REAL,
-        support REAL,
-        macd REAL,
-        rsi REAL,
-        ema REAL,
-        stochastic_D REAL,
-        stochastic_K REAL
-    )
-    ''')
+def create_database_if_not_exists():
+    with app.app_context():
+        db.create_all()
 
-    cursor.execute('''
-    INSERT INTO analyzed_data (time, open, high, low, close, volume, resistance, support, macd, rsi, ema, stochastic_D, stochastic_K)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (row['time'], row['open'], row['high'], row['low'], row['close'], row['volume'], row.get('resistance', np.nan), row.get('support', np.nan), row.get('macd', np.nan), row.get('rsi', np.nan), row.get('ema', np.nan), row.get('stochastic-D', np.nan), row.get('stochastic-K', np.nan)))
-
-    conn.commit()
-    conn.close()
-    print("Data saved for time:", row['time'])
+def update_db(row):
+    with app.app_context():
+        analyzed_data = AnalyzedData(
+            time=row['time'],
+            open=row['open'],
+            high=row['high'],
+            low=row['low'],
+            close=row['close'],
+            volume=row['volume'],
+            resistance=row.get('resistance', np.nan),
+            support=row.get('support', np.nan),
+            macd=row.get('macd', np.nan),
+            rsi=row.get('rsi', np.nan),
+            ema=row.get('ema', np.nan),
+            stochastic_D=row.get('stochastic-D', np.nan),
+            stochastic_K=row.get('stochastic-K', np.nan)
+        )
+        db.session.add(analyzed_data)
+        db.session.commit()
+        print("Data saved for time:", row['time'])
 
 def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
     # Initialize Binance client (use your API keys if you have them)
@@ -112,7 +121,7 @@ def apply_technicals(df):
         # Calculate EMA
         df_tech['ema'] = df_tech['close'].ewm(span=14, adjust=False).mean()
         # Fill NaN values with previous values
-        df_tech.fillna(method='bfill', inplace=True)
+        df_tech = df_tech.fillna(method='ffill')
     except Exception as e:
         print(f"Error in technical analysis: {e}")
         return df
@@ -121,7 +130,7 @@ def apply_technicals(df):
 # ===================== EXECUTE =====================
 symbol = 'ETHUSDT'
 timePeriod = '1h'
-lookback = 60
+lookback = 100
 df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTIL HERE ALL WORKS =============
 # Create a list to collect processed rows
@@ -133,21 +142,15 @@ analyzed_df['rsi'] = np.nan
 analyzed_df['ema'] = np.nan
 analyzed_df['stochastic-D'] = np.nan
 analyzed_df['stochastic-K'] = np.nan
-
+print(df.tail(10))
 for index, row in df.iterrows():
     analyzed_df = df.iloc[0:index+1].copy()
+    print("analyzed data =========> ",analyzed_df)
 
     if len(analyzed_df) > 15:
         analyzed_df = find_extremum(analyzed_df, window=10)
         analyzed_df = apply_technicals(analyzed_df)      
-    # Print the latest processed row
-    # print("analyzed data INDEX =========> ",index, " row: ",row)
-    # print("analyzed data =========> ",analyzed_df)
-    # print(tabulate(analyzed_df.tail(), headers='keys', tablefmt='psql', showindex=True, floatfmt=".4f"))
-    # print("analyzed data =========> ",row_df['resistance'],row_df['support'])
-    save_data(row)
+    create_database_if_not_exists()
+    print("Database created")
+    update_db(row)
     time.sleep(1)
-
-# Combine all processed rows into final DataFrame
-# analyzed_df = pd.concat(processed_rows)
-# save_data(analyzed_df)
