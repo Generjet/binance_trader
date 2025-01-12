@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Price Data</title>
     <style>
-        body {
+        body.dark-mode {
             background-color: #121212;
             color: #ffffff;
-            font-family: Arial, sans-serif;
+        }
+        body.default-mode {
+            background-color: #ffffff;
+            color: #000000;
         }
         .data {
             width: 100%;
@@ -50,6 +53,17 @@
         .pagination button:hover {
             background-color: #444;
         }
+        .toggle-button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .toggle-button:hover {
+            background-color: #444;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -58,6 +72,13 @@
             const socket = io();
             let currentPage = 1;
             const rowsPerPage = 30;
+
+            const toggleButton = document.getElementById('toggleButton');
+            toggleButton.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                document.body.classList.toggle('default-mode');
+                updateChart(JSON.parse(document.getElementById('chart').dataset.chartData));
+            });
 
             socket.on('new_data', (data) => {
                 document.getElementById('latest-open').innerText = data.open;
@@ -81,6 +102,12 @@
             });
 
             function updateChart(data) {
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                const template = isDarkMode ? 'plotly_dark' : 'plotly_white';
+                const fontColor = isDarkMode ? 'white' : 'black';
+                const plotBgColor = isDarkMode ? 'black' : 'white';
+                const paperBgColor = isDarkMode ? 'black' : 'white';
+
                 const candlestick = {
                     x: data.map(d => d.time),
                     open: data.map(d => d.open),
@@ -166,72 +193,72 @@
                 };
 
                 const layoutCandlestick = {
-                    template: 'plotly_dark',
+                    template: template,
                     xaxis: { rangeslider: { visible: false } },
                     title: 'Crypto Price Data',
-                    yaxis: { title: 'Price', color: 'white' },
-                    xaxis: { title: 'Time', color: 'white' },
-                    plot_bgcolor: 'black',
-                    paper_bgcolor: 'black',
-                    font: { color: 'white' },
-                    legend: { font: { color: 'white' } }
+                    yaxis: { title: 'Price', color: fontColor },
+                    xaxis: { title: 'Time', color: fontColor },
+                    plot_bgcolor: plotBgColor,
+                    paper_bgcolor: paperBgColor,
+                    font: { color: fontColor },
+                    legend: { font: { color: fontColor } }
                 };
 
                 const layoutVolume = {
-                    template: 'plotly_dark',
+                    template: template,
                     title: 'Volume',
-                    yaxis: { title: 'Volume', color: 'white' },
-                    xaxis: { title: 'Time', color: 'white' },
-                    plot_bgcolor: 'black',
-                    paper_bgcolor: 'black',
-                    font: { color: 'white' },
-                    legend: { font: { color: 'white' } }
+                    yaxis: { title: 'Volume', color: fontColor },
+                    xaxis: { title: 'Time', color: fontColor },
+                    plot_bgcolor: plotBgColor,
+                    paper_bgcolor: paperBgColor,
+                    font: { color: fontColor },
+                    legend: { font: { color: fontColor } }
                 };
 
                 const layoutMACD = {
-                    template: 'plotly_dark',
+                    template: template,
                     title: 'MACD',
-                    yaxis: { title: 'MACD', color: 'white' },
-                    xaxis: { title: 'Time', color: 'white' },
+                    yaxis: { title: 'MACD', color: fontColor },
+                    xaxis: { title: 'Time', color: fontColor },
                     shapes: [
                         { type: 'line', x0: 0, x1: 1, y0: 20, y1: 20, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } },
                         { type: 'line', x0: 0, x1: 1, y0: 80, y1: 80, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } },
                         { type: 'line', x0: 0, x1: 1, y0: 0, y1: 0, xref: 'paper', yref: 'y', line: { color: 'white', dash: 'dash' } }
                     ],
-                    plot_bgcolor: 'black',
-                    paper_bgcolor: 'black',
-                    font: { color: 'white' },
-                    legend: { font: { color: 'white' } }
+                    plot_bgcolor: plotBgColor,
+                    paper_bgcolor: paperBgColor,
+                    font: { color: fontColor },
+                    legend: { font: { color: fontColor } }
                 };
 
                 const layoutRSI = {
-                    template: 'plotly_dark',
+                    template: template,
                     title: 'RSI',
-                    yaxis: { title: 'RSI', color: 'white' },
-                    xaxis: { title: 'Time', color: 'white' },
+                    yaxis: { title: 'RSI', color: fontColor },
+                    xaxis: { title: 'Time', color: fontColor },
                     shapes: [
                         { type: 'line', x0: 0, x1: 1, y0: 20, y1: 20, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } },
                         { type: 'line', x0: 0, x1: 1, y0: 80, y1: 80, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } }
                     ],
-                    plot_bgcolor: 'black',
-                    paper_bgcolor: 'black',
-                    font: { color: 'white' },
-                    legend: { font: { color: 'white' } }
+                    plot_bgcolor: plotBgColor,
+                    paper_bgcolor: paperBgColor,
+                    font: { color: fontColor },
+                    legend: { font: { color: fontColor } }
                 };
 
                 const layoutStochastic = {
-                    template: 'plotly_dark',
+                    template: template,
                     title: 'Stochastic',
-                    yaxis: { title: 'Stochastic', color: 'white' },
-                    xaxis: { title: 'Time', color: 'white' },
+                    yaxis: { title: 'Stochastic', color: fontColor },
+                    xaxis: { title: 'Time', color: fontColor },
                     shapes: [
                         { type: 'line', x0: 0, x1: 1, y0: 20, y1: 20, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } },
                         { type: 'line', x0: 0, x1: 1, y0: 80, y1: 80, xref: 'paper', yref: 'y', line: { color: 'red', dash: 'dash' } }
                     ],
-                    plot_bgcolor: 'black',
-                    paper_bgcolor: 'black',
-                    font: { color: 'white' },
-                    legend: { font: { color: 'white' } }
+                    plot_bgcolor: plotBgColor,
+                    paper_bgcolor: paperBgColor,
+                    font: { color: fontColor },
+                    legend: { font: { color: fontColor } }
                 };
 
                 Plotly.newPlot('chart', [candlestick, ema, resistance, support], layoutCandlestick);
@@ -290,8 +317,9 @@
         });
     </script>
 </head>
-<body>
+<body class="dark-mode">
     <h1>Crypto Price Data</h1>
+    <button id="toggleButton" class="toggle-button">Toggle Design</button>
     <div class="latest-data">
         <p>Latest Data:</p>
         <p>Open: <span id="latest-open">{{ latest_data.get('open', 'N/A') }}</span></p>
