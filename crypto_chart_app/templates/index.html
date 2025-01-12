@@ -3,29 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Chart</title>
+    <title>Crypto Price Data</title>
     <style>
-        table {
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .data {
             width: 100%;
             border-collapse: collapse;
         }
-        th, td {
-            border: 1px solid black;
+        .data th, .data td {
+            border: 1px solid #444;
             padding: 8px;
             text-align: left;
+        }
+        .data th {
+            background-color: #333;
+        }
+        .data tr:nth-child(even) {
+            background-color: #2a2a2a;
+        }
+        .data tr:hover {
+            background-color: #444;
+        }
+        .data td {
+            color: #00ff00;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Crypto арилжааны автоматжуулсан систем　暗号化販売自動化システム
-        </h1>
-        <div id="chart-container">
-            {{ chart_html | safe }}
-        </div>
-        <div id="table-container">
-            {{ table_data | safe }}
-        </div>
-    </div>
+    <h1>Crypto Price Data</h1>
+    <div id="chart">{{ chart_html|safe }}</div>
+    <div id="table">{{ table_data|safe }}</div>
 </body>
 </html>
