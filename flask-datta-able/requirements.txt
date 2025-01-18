@@ -31,5 +31,12 @@ python-dotenv==1.0.1
 gunicorn==23.0.0
 Flask-Minify==0.48
 
+# blog features
+Flask-CKEditor==0.4.6
+Flask-Uploads==0.2.1
+
 # flask_mysqldb
 # psycopg2-binary
+
+# vector database
+chromadb==0.4.24

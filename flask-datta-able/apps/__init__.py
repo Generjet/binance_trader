@@ -8,22 +8,31 @@ import os
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from flask_ckeditor import CKEditor
 from importlib import import_module
 
 
 db = SQLAlchemy()
+ckeditor = CKEditor()
 login_manager = LoginManager()
 
 
 def register_extensions(app):
     db.init_app(app)
     login_manager.init_app(app)
+    ckeditor.init_app(app)
 
 
 def register_blueprints(app):
-    for module_name in ('authentication', 'home', 'api'):
+    for module_name in ('authentication', 'home', 'api', 'blog'):
         module = import_module('apps.{}.routes'.format(module_name))
-        app.register_blueprint(module.blueprint)
+        # Try standard blueprint name first, then module-specific name
+        blueprint = getattr(module, 'blueprint', None) or \
+                   getattr(module, f'{module_name}_bp', None)
+        if blueprint:
+            app.register_blueprint(blueprint)
+        else:
+            print(f'> Warning: No blueprint found for module {module_name}')
 
 
 def configure_database(app):

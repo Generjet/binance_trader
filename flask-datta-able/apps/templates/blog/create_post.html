@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Create New Blog Post</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            {{ form.title.label }}
+            {{ form.title(class="form-control") }}
+            {% for error in form.title.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.category.label }}
+            {{ form.category(class="form-control") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.thumbnail.label }}
+            {{ form.thumbnail(class="form-control-file") }}
+            {% if form.thumbnail.errors %}
+                {% for error in form.thumbnail.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.content.label }}
+            {{ form.content(class="form-control", rows=20) }}
+            {% for error in form.content.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Post</button>
+        <a href="{{ url_for('blog.index') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
