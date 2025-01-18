@@ -4,67 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Price Data</title>
-    <style>
-        body.dark-mode {
-            background-color: #121212;
-            color: #ffffff;
-        }
-        body.default-mode {
-            background-color: #ffffff;
-            color: #000000;
-        }
-        .data {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .data th, .data td {
-            border: 1px solid #444;
-            padding: 8px;
-            text-align: left;
-        }
-        .data th {
-            background-color: #333;
-        }
-        .data tr:nth-child(even) {
-            background-color: #2a2a2a;
-        }
-        .data tr:hover {
-            background-color: #444;
-        }
-        .data td {
-            color: #00ff00;
-        }
-        .latest-data {
-            margin-bottom: 20px;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .pagination button {
-            background-color: #333;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            margin: 0 5px;
-            cursor: pointer;
-        }
-        .pagination button:hover {
-            background-color: #444;
-        }
-        .toggle-button {
-            background-color: #333;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-        .toggle-button:hover {
-            background-color: #444;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>

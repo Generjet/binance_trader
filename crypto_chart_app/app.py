@@ -7,7 +7,9 @@ from flask_socketio import SocketIO, emit
 from save2mysql import db, AnalyzedData
 import time
 
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_folder='static', static_url_path='/static')
+app._static_folder = 'static'
+app.add_url_rule('/assets/<path:filename>', endpoint='assets', view_func=app.send_static_file)
 CORS(app)
 socketio = SocketIO(app)
 
