@@ -33,7 +33,9 @@
         <div class="form-group">
             {{ form.content.label }}
             <div id="editor-container">
-                {{ form.content(class="form-control", rows=20, id="editor") }}
+                {{ ckeditor.load() }}
+                {{ ckeditor.config(name='content', height=400) }}
+                {{ form.content(class="form-control", rows=20) }}
             </div>
             {% for error in form.content.errors %}
                 <span class="text-danger">{{ error }}</span>
@@ -46,3 +48,6 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+{% endblock extra_js %}

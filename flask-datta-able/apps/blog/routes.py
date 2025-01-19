@@ -5,9 +5,6 @@ from apps.blog.forms import BlogPostForm
 from apps.models import BlogPost
 from werkzeug.utils import secure_filename
 import os
-import chromadb
-from chromadb.utils import embedding_functions
-
 blog_bp = Blueprint('blog', __name__, url_prefix='/blog')
 
 @blog_bp.route('/create', methods=['GET', 'POST'])
@@ -32,34 +29,15 @@ def create_post():
             thumbnail=thumbnail
         )
         
-        # Initialize ChromaDB client and embedding function
-        chroma_client = chromadb.PersistentClient(path="chroma_db")
-        embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
-        
-        # Get or create collection
-        collection = chroma_client.get_or_create_collection(
-            name="blog_posts",
-            embedding_function=embedding_fn
-        )
-        
-        # Add document to ChromaDB
-        collection.add(
-            documents=[form.content.data],
-            metadatas=[{
-                "title": form.title.data,
-                "author_id": current_user.id,
-                "category": form.category.data
-            }],
-            ids=[str(post.id)]
-        )
-        
         try:
-            post.save()
+            db.session.add(post)
+            db.session.commit()
             flash('Blog post created successfully!', 'success')
-            return redirect(url_for('blog.view_post', post_id=post.id))
+            return redirect(url_for('blog.index'))
         except Exception as e:
             db.session.rollback()
             flash(f'Error creating post: {str(e)}', 'danger')
+            return redirect(url_for('blog.index'))
 
     return render_template('blog/create_post.html', form=form)
 
