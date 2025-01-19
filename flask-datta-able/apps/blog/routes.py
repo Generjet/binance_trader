@@ -20,10 +20,17 @@ def create_post():
             form.thumbnail.data.save(filepath)
             thumbnail = f'static/uploads/blog/{filename}'
 
+        # Extract plain text from content
+        import re
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(form.content.data, 'html.parser')
+        content_text = soup.get_text()
+        
         # Create new blog post
         post = BlogPost(
             title=form.title.data,
             content=form.content.data,
+            content_text=content_text,
             author_id=current_user.id,
             category=form.category.data,
             thumbnail=thumbnail
