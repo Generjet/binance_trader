@@ -62,6 +62,7 @@ class BlogPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    content_text = db.Column(db.Text, nullable=True)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     category = db.Column(db.String(100), nullable=True)
     thumbnail = db.Column(db.String(200), nullable=True)
