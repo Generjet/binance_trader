@@ -65,37 +65,20 @@ def edit_post(post_id):
     form = BlogPostForm(obj=post)
     if form.validate_on_submit():
         # Handle file upload
-        if form.thumbnail.data:
+        if form.thumbnail.data and hasattr(form.thumbnail.data, 'filename'):
             filename = secure_filename(form.thumbnail.data.filename)
             filepath = os.path.join('apps/static/uploads/blog', filename)
             form.thumbnail.data.save(filepath)
             post.thumbnail = f'static/uploads/blog/{filename}'
+        elif request.form.get('remove_thumbnail'):
+            post.thumbnail = None
 
         post.title = form.title.data
         post.content = form.content.data
         post.category = form.category.data
         
-        # Update ChromaDB vector
-        chroma_client = chromadb.PersistentClient(path="chroma_db")
-        embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
-        collection = chroma_client.get_or_create_collection(
-            name="blog_posts",
-            embedding_function=embedding_fn
-        )
-        
-        # Update document in ChromaDB
-        collection.update(
-            ids=[str(post.id)],
-            documents=[form.content.data],
-            metadatas=[{
-                "title": form.title.data,
-                "author_id": current_user.id,
-                "category": form.category.data
-            }]
-        )
-        
         try:
-            post.save()
+            db.session.commit()
             flash('Post updated successfully!', 'success')
             return redirect(url_for('blog.view_post', post_id=post.id))
         except Exception as e:
