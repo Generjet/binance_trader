@@ -44,11 +44,7 @@
         <div class="form-group">
             {{ form.content.label }}
             <div id="editor-container">
-                {{ ckeditor.load() }}
-                {{ ckeditor.config(name='content', height=400, 
-                    filebrowserUploadUrl=url_for('blog.upload_image'),
-                    filebrowserUploadMethod='form') }}
-                {{ form.content(class="form-control", rows=20) }}
+                <textarea id="content" name="content" class="form-control" rows="20">{{ form.content.data }}</textarea>
             </div>
             {% for error in form.content.errors %}
                 <span class="text-danger">{{ error }}</span>
@@ -60,4 +56,21 @@
     </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="//cdn.ckeditor.com/4.20.1/standard/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('content', {
+            height: 400,
+            toolbar: [
+                { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat' ] },
+                { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote' ] },
+                { name: 'links', items: [ 'Link', 'Unlink' ] },
+                { name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule' ] },
+                { name: 'styles', items: [ 'Styles', 'Format' ] },
+                { name: 'tools', items: [ 'Maximize' ] }
+            ]
+        });
+    </script>
 {% endblock %}
