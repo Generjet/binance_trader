@@ -1,11 +1,12 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
-<div class="container">
+<div class="pc-container">
+    <div class="pc-content">
     <h1>{{ post.title }}</h1>
     
     {% if post.thumbnail %}
-    <img src="{{ url_for('static', filename=post.thumbnail) }}" class="img-fluid mb-4" alt="Post thumbnail">
+    <img src="{{ url_for('static', filename=post.thumbnail.replace('static/', '')) }}" class="img-fluid mb-4" alt="Post thumbnail">
     {% endif %}
     
     <div class="post-meta mb-4">
@@ -25,5 +26,6 @@
         </form>
     </div>
     {% endif %}
+    </div>
 </div>
 {% endblock %}
