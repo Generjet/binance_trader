@@ -59,12 +59,13 @@ def configure_database(app):
         db.session.remove()
 
 from apps.authentication.oauth import github_blueprint
+from apps.blog.routes import blog_bp as blog_blueprint
 
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
     register_extensions(app)
     register_blueprints(app)
-    app.register_blueprint(github_blueprint, url_prefix="/login")    
+    app.register_blueprint(github_blueprint, url_prefix="/login")
     configure_database(app)
     return app

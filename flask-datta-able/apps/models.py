@@ -146,6 +146,49 @@ class BlogPost(db.Model):
             error = str(e.__dict__['orig'])
             raise InvalidUsage(error, 422)
 
+class YearlyWesternHoroscope(db.Model):
+    __tablename__ = 'yearly_western_horoscope'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    zodiac = db.Column(db.Enum(
+        'Aries', 'Taurus', 'Gemini', 'Cancer',
+        'Leo', 'Virgo', 'Libra', 'Scorpio',
+        'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+        name='zodiac_types'
+    ), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=dt.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=dt.datetime.utcnow,
+                          onupdate=dt.datetime.utcnow)
+    
+    def __init__(self, **kwargs):
+        super(YearlyWesternHoroscope, self).__init__(**kwargs)
+    
+    @classmethod
+    def find_by_id(cls, _id: int) -> "YearlyWesternHoroscope":
+        return cls.query.filter_by(id=_id).first()
+    
+    def save(self) -> None:
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            db.session.close()
+            error = str(e.__dict__['orig'])
+            raise InvalidUsage(error, 422)
+    
+    def delete(self) -> None:
+        try:
+            db.session.delete(self)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            db.session.close()
+            error = str(e.__dict__['orig'])
+            raise InvalidUsage(error, 422)
+
 class Sale(db.Model):
     __tablename__ = 'sales'
 

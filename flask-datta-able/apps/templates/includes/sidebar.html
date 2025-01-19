@@ -36,63 +36,10 @@
           <i data-feather="feather"></i>
         </li>
         <li class="pc-item">
-          <a href="{{ url_for('home_blueprint.color') }}" class="pc-link">
-            <span class="pc-micon"><i data-feather="droplet"></i></span>
-            <span class="pc-mtext">Color</span>
+          <a href="{{ url_for('blog.horoscope_index') }}" class="pc-link">
+            <span class="pc-micon"><i data-feather="star"></i></span>
+            <span class="pc-mtext">Western Horoscope</span>
           </a>
-        </li>
-        <li class="pc-item">
-          <a href="{{ url_for('home_blueprint.typography') }}" class="pc-link">
-            <span class="pc-micon"><i data-feather="type"></i></span>
-            <span class="pc-mtext">Typography</span>
-          </a>
-        </li>
-        <li class="pc-item">
-          <a href="{{ url_for('home_blueprint.icon_feather') }}" class="pc-link">
-            <span class="pc-micon"><i data-feather="feather"></i></span>
-            <span class="pc-mtext">Icons</span>
-          </a>
-        </li>
-        <li class="pc-item pc-caption">
-          <label>Pages</label>
-          <i data-feather="monitor"></i>
-        </li> 
-        {% if not current_user.is_authenticated %}
-        <li class="pc-item">
-          <a href="{{ url_for('authentication_blueprint.login') }}" class="pc-link">
-            <span class="pc-micon"><i data-feather="lock"></i></span>
-            <span class="pc-mtext">Login</span>
-          </a>
-        </li>
-        <li class="pc-item">
-          <a href="{{ url_for('authentication_blueprint.register') }}" class="pc-link">
-            <span class="pc-micon"><i data-feather="user-plus"></i></span>
-            <span class="pc-mtext">Register</span>
-          </a>
-        </li>
-        {% else %}
-        <li class="pc-item">
-          <a href="{{ url_for('authentication_blueprint.logout') }}" class="pc-link">
-            <span class="pc-micon">
-              <svg class="pc-icon me-2">
-                <use xlink:href="#custom-logout-1-outline"></use>
-              </svg>
-            </span>
-            <span class="pc-mtext">Logout</span>
-          </a>
-        </li>
-        {% endif %}
-        <li class="pc-item">
-    <a href="{{ url_for('blog.index') }}" class="pc-link">
-            <span class="pc-micon">
-              <i data-feather="book"></i>
-            </span>
-            <span class="pc-mtext">Blog</span>
-          </a>
-        </li>
-        <li class="pc-item pc-caption">
-          <label>Other</label>
-          <i data-feather="sidebar"></i>
         </li>
         <li class="pc-item pc-hasmenu">
           <a href="#!" class="pc-link">
@@ -143,6 +90,53 @@
           </ul>
         </li>
         <li class="pc-item">
+          <a href="{{ url_for('home_blueprint.icon_feather') }}" class="pc-link">
+            <span class="pc-micon"><i data-feather="feather"></i></span>
+            <span class="pc-mtext">Icons</span>
+          </a>
+        </li>
+        <li class="pc-item pc-caption">
+          <label>Pages</label>
+          <i data-feather="monitor"></i>
+        </li> 
+        {% if not current_user.is_authenticated %}
+        <li class="pc-item">
+          <a href="{{ url_for('authentication_blueprint.login') }}" class="pc-link">
+            <span class="pc-micon"><i data-feather="lock"></i></span>
+            <span class="pc-mtext">Login</span>
+          </a>
+        </li>
+        <li class="pc-item">
+          <a href="{{ url_for('authentication_blueprint.register') }}" class="pc-link">
+            <span class="pc-micon"><i data-feather="user-plus"></i></span>
+            <span class="pc-mtext">Register</span>
+          </a>
+        </li>
+        {% else %}
+        <li class="pc-item">
+          <a href="{{ url_for('authentication_blueprint.logout') }}" class="pc-link">
+            <span class="pc-micon">
+              <svg class="pc-icon me-2">
+                <use xlink:href="#custom-logout-1-outline"></use>
+              </svg>
+            </span>
+            <span class="pc-mtext">Logout</span>
+          </a>
+        </li>
+        {% endif %}
+        <li class="pc-item">
+           <a href="{{ url_for('blog.index') }}" class="pc-link">
+            <span class="pc-micon">
+              <i data-feather="book"></i>
+            </span>
+            <span class="pc-mtext">Blog</span>
+          </a>
+        </li>
+        <li class="pc-item pc-caption">
+          <label>Other</label>
+          <i data-feather="sidebar"></i>
+        </li>
+        <li class="pc-item">
           <a href="{{ url_for('home_blueprint.sample_page') }}" class="pc-link">
             <span class="pc-micon"><i data-feather="sidebar"></i></span>
             <span class="pc-mtext">Sample page</span>
@@ -151,16 +145,7 @@
        
       </ul>
       <div class="card pc-user-card my-3 bg-white bg-opacity-10">
-        <div class="card-body text-center">
-          <img src="{{ url_for('static', filename='assets/images/application/img-coupon.png') }}" alt="img" class="img-fluid w-50">
-          <h5 class="mb-0 text-white mt-1">Datta Able</h5>
-          <a href="https://app-generator.dev/product/datta-able-pro/flask/" class="btn btn-warning">
-            <svg class="pc-icon me-2">
-              <use xlink:href="#custom-logout-1-outline"></use>
-            </svg>
-            Upgrade to PRO
-          </a>
-        </div>
+
       </div>
     </div>
   </div>

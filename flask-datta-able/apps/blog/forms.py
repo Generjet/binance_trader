@@ -1,4 +1,6 @@
 from flask_wtf import FlaskForm
+from wtforms import SelectField, IntegerField, TextAreaField
+from wtforms.validators import DataRequired
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Length
@@ -26,3 +28,21 @@ class BlogPostForm(FlaskForm):
     thumbnail = FileField('Thumbnail Image', validators=[
         FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')
     ])
+
+class YearlyWesternHoroscopeForm(FlaskForm):
+    zodiac = SelectField('Zodiac', choices=[
+        ('Aries', 'Aries'),
+        ('Taurus', 'Taurus'),
+        ('Gemini', 'Gemini'),
+        ('Cancer', 'Cancer'),
+        ('Leo', 'Leo'),
+        ('Virgo', 'Virgo'),
+        ('Libra', 'Libra'),
+        ('Scorpio', 'Scorpio'),
+        ('Sagittarius', 'Sagittarius'),
+        ('Capricorn', 'Capricorn'),
+        ('Aquarius', 'Aquarius'),
+        ('Pisces', 'Pisces')
+    ], validators=[DataRequired()])
+    year = IntegerField('Year', validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired()])

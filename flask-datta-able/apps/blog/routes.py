@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from apps import db
-from apps.blog.forms import BlogPostForm
-from apps.models import BlogPost
+from apps.blog.forms import BlogPostForm, YearlyWesternHoroscopeForm
+from apps.models import BlogPost, YearlyWesternHoroscope
 from werkzeug.utils import secure_filename
 import os
-blog_bp = Blueprint('blog', __name__, url_prefix='/blog')
+blog_bp = Blueprint('blog', __name__)
 
 @blog_bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -115,3 +115,43 @@ def delete_post(post_id):
         flash(f'Error deleting post: {str(e)}', 'danger')
     
     return redirect(url_for('blog.index'))
+
+# Horoscope Routes
+@blog_bp.route('/horoscope')
+def horoscope_index():
+    horoscopes = YearlyWesternHoroscope.query.order_by(YearlyWesternHoroscope.year.desc()).all()
+    return render_template('blog/horoscope/index.html', horoscopes=horoscopes)
+
+@blog_bp.route('/horoscope/create', methods=['GET', 'POST'])
+@login_required
+def create_horoscope():
+    form = YearlyWesternHoroscopeForm()
+    if form.validate_on_submit():
+        horoscope = YearlyWesternHoroscope(
+            zodiac=form.zodiac.data,
+            year=form.year.data,
+            content=form.content.data
+        )
+        try:
+            horoscope.save()
+            flash('Horoscope created successfully!', 'success')
+            return redirect(url_for('blog.horoscope_index'))
+        except Exception as e:
+            flash(f'Error creating horoscope: {str(e)}', 'danger')
+    return render_template('blog/horoscope/create.html', form=form)
+
+@blog_bp.route('/horoscope/<int:id>')
+def view_horoscope(id):
+    horoscope = YearlyWesternHoroscope.find_by_id(id)
+    if not horoscope:
+        flash('Horoscope not found', 'danger')
+        return redirect(url_for('blog.horoscope_index'))
+    return render_template('blog/horoscope/view.html', horoscope=horoscope)
+
+@blog_bp.route('/horoscope/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_horoscope(id):
+    horoscope = YearlyWesternHoroscope.find_by_id(id)
+    if not horoscope:
+        flash('Horoscope not found', 'danger')
+        return redirect(url_for('blog.horoscope_index'))
