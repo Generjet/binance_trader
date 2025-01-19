@@ -45,7 +45,9 @@
             {{ form.content.label }}
             <div id="editor-container">
                 {{ ckeditor.load() }}
-                {{ ckeditor.config(name='content', height=400) }}
+                {{ ckeditor.config(name='content', height=400, 
+                    filebrowserUploadUrl=url_for('blog.upload_image'),
+                    filebrowserUploadMethod='form') }}
                 {{ form.content(class="form-control", rows=20) }}
             </div>
             {% for error in form.content.errors %}
