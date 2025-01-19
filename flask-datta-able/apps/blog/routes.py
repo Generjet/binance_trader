@@ -73,6 +73,12 @@ def edit_post(post_id):
         elif request.form.get('remove_thumbnail'):
             post.thumbnail = None
 
+        # Extract plain text from content
+        import re
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(form.content.data, 'html.parser')
+        post.content_text = soup.get_text()
+        
         post.title = form.title.data
         post.content = form.content.data
         post.category = form.category.data

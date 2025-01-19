@@ -82,6 +82,12 @@ class BlogPost(db.Model):
     
     def save(self) -> None:
         try:
+            # Extract plain text from content
+            import re
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(self.content, 'html.parser')
+            self.content_text = soup.get_text()
+            
             # First save the post to get an ID
             db.session.add(self)
             db.session.flush()  # Get the ID before commit
