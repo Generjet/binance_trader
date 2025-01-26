@@ -36,9 +36,28 @@ def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
     df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].astype(float)
     # Convert timestamp to datetime
     df['time'] = pd.to_datetime(df['time'], unit='ms')
-    df.to_csv('data/crypto_price.csv', index=False)
+    
+    # Construct absolute path for CSV
+    csv_path = os.path.join(os.getcwd(), 'crypto_chart_app', 'data', 'crypto_price.csv')
+    df.to_csv(csv_path, index=False)
     # Keep only necessary columns
     df = df[['time', 'open', 'high', 'low', 'close', 'volume']]
+    return df
+
+def support-resistance_range(df, price_range=10):
+    # Calculate resistance levels
+    resistance_upper_range = df['resistance'] + price_range
+    resistance_lower_range = df['resistance'] - price_range
+    # Calculate support levels
+    support_upper_range = df['support'] + price_range
+    support_lower_range = df['support'] - price_range
+    # check if the current price is within the support range
+    is_near_support = (df['close'] >= support_lower_range) & (df['close'] <= support_upper_range)
+    # check if the current price is within the resistance range
+    is_near_resistance = (df['close'] >= resistance_lower_range) & (df['close'] <= resistance_upper_range)
+    # Add the new columns to the DataFrame
+    df['near_support'] = is_near_support
+    df['near_resistance'] = is_near_resistance
     return df
 
 def find_extremum(df, window=4):
@@ -97,10 +116,15 @@ df = fetchCryptoData(symbol, timePeriod, lookback)
 analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume'])
 
 for index, row in df.iterrows():
+    # for index, row in df.iterrows(): нь historical data-г нэг нэгээр авч байгаа simulation
+    # Эндээс эхлээд анализ хийж шалгах
+    # ХАМГИЙН СҮҮЛЧИЙН 20 МЭДЭЭЛЭЛ -> analyzed_df = df.tail(20)
     analyzed_df = df.iloc[0:index+1].copy()
+    analyzed_df = analyzed_df.tail(20)
     # print("analyzed data =========> ",analyzed_df)
     if len(analyzed_df) > 4:
         analyzed_df = find_extremum(analyzed_df, 4)
+        analyzed_df = support-resistance_range(analyzed_df, 10)
     if len(analyzed_df) > 15:
         analyzed_df = apply_technicals(analyzed_df)
         print("\nAnalyzed data after technicals:")
@@ -110,4 +134,38 @@ for index, row in df.iterrows():
     # update_db(row)
     latest_row = analyzed_df.iloc[-1]
     update_db(latest_row)
+    
+    # Plotting logic
+    if len(analyzed_df) > 5:
+        fig = go.Figure(data=[go.Candlestick(
+            x=analyzed_df['time'],
+            open=analyzed_df['open'],
+            high=analyzed_df['high'],
+            low=analyzed_df['low'],
+            close=analyzed_df['close']
+        )])
+
+        pip_value = 0.20  # 20 pips for ETH/USDT - adjust as needed
+        near_support = abs(analyzed_df['close'] - analyzed_df['support']) <= pip_value
+        near_resistance = abs(analyzed_df['close'] - analyzed_df['resistance']) <= pip_value
+
+        fig.add_trace(go.Scatter(
+            x=analyzed_df[near_support]['time'],
+            y=analyzed_df[near_support]['close'],
+            mode='markers',
+            marker=dict(color='red', size=8),
+            name='Near Support (20 pips)'
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=analyzed_df[near_resistance]['time'],
+            y=analyzed_df[near_resistance]['close'],
+            mode='markers',
+            marker=dict(color='yellow', size=8),
+            name='Near Resistance (20 pips)'
+        ))
+
+        fig.write_image("crypto_chart_app/chart.png")
+        print("Chart saved to crypto_chart_app/chart.png")
+
     time.sleep(2)
