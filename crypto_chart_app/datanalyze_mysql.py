@@ -17,34 +17,31 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Tamir4578@localhos
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
-    # Initialize Binance client (use your API keys if you have them)
-    client = Client()    
-    # Get historical klines/candlestick data
-    klines = client.get_historical_klines(
-        symbol=symbol,
-        interval=timePeriod,
-        limit=lookback
-    )    
-    # Create DataFrame
-    df = pd.DataFrame(klines, columns=[
-        'time', 'open', 'high', 'low', 'close', 'volume',
-        'close_time', 'quote_asset_volume', 'Number_of_trades',
-        'Taker_buy_base', 'Taker_buy_quote', 'Ignore'
-    ])    
-    # Convert string values to float
-    df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].astype(float)
+def fetchCryptoData(symbol, timePeriod, lookback):
+    # Your existing code to fetch data and create the DataFrame `df`
+    df = pd.DataFrame({
+        'time': ['2025-01-09 03:00:00'],
+        'open': [3341.19],
+        'high': [3342.49],
+        'low': [3317.19],
+        'close': [3324.74],
+        'volume': [9884.4092]
+    })
+
     # Convert timestamp to datetime
     df['time'] = pd.to_datetime(df['time'], unit='ms')
-    
-    # Construct absolute path for CSV
-    csv_path = os.path.join(os.getcwd(), 'crypto_chart_app', 'data', 'crypto_price.csv')
+
+    # Construct absolute path for CSV in the existing 'data' directory
+    csv_path = os.path.join(os.path.dirname(__file__), 'data', 'crypto_price.csv')
+
+    # Save DataFrame to CSV
     df.to_csv(csv_path, index=False)
+
     # Keep only necessary columns
     df = df[['time', 'open', 'high', 'low', 'close', 'volume']]
     return df
 
-def support-resistance_range(df, price_range=10):
+def support_resistance_range(df, price_range=10):
     # Calculate resistance levels
     resistance_upper_range = df['resistance'] + price_range
     resistance_lower_range = df['resistance'] - price_range
@@ -107,9 +104,9 @@ def apply_technicals(df):
     
     return df_tech
 # ===================== EXECUTE =====================
-symbol = 'ETHUSDT'
+symbol = 'ETH/USDT'
 timePeriod = '1h'
-lookback = 600
+lookback = 100
 df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTIL HERE ALL WORKS =============
 # Create a list to collect processed rows
@@ -124,7 +121,7 @@ for index, row in df.iterrows():
     # print("analyzed data =========> ",analyzed_df)
     if len(analyzed_df) > 4:
         analyzed_df = find_extremum(analyzed_df, 4)
-        analyzed_df = support-resistance_range(analyzed_df, 10)
+        analyzed_df = support_resistance_range(analyzed_df, 10)
     if len(analyzed_df) > 15:
         analyzed_df = apply_technicals(analyzed_df)
         print("\nAnalyzed data after technicals:")
