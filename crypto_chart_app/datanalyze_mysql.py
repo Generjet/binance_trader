@@ -17,26 +17,29 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Tamir4578@localhos
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-def fetchCryptoData(symbol, timePeriod, lookback):
-    # Your existing code to fetch data and create the DataFrame `df`
-    df = pd.DataFrame({
-        'time': ['2025-01-09 03:00:00'],
-        'open': [3341.19],
-        'high': [3342.49],
-        'low': [3317.19],
-        'close': [3324.74],
-        'volume': [9884.4092]
-    })
-
+def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
+    # Initialize Binance client (use your API keys if you have them)
+    client = Client()    
+    # Get historical klines/candlestick data
+    klines = client.get_historical_klines(
+        symbol=symbol,
+        interval=timePeriod,
+        limit=lookback
+    )    
+    # Create DataFrame
+    df = pd.DataFrame(klines, columns=[
+        'time', 'open', 'high', 'low', 'close', 'volume',
+        'close_time', 'quote_asset_volume', 'Number_of_trades',
+        'Taker_buy_base', 'Taker_buy_quote', 'Ignore'
+    ])    
+    # Convert string values to float
+    df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].astype(float)
     # Convert timestamp to datetime
     df['time'] = pd.to_datetime(df['time'], unit='ms')
-
     # Construct absolute path for CSV in the existing 'data' directory
     csv_path = os.path.join(os.path.dirname(__file__), 'data', 'crypto_price.csv')
-
     # Save DataFrame to CSV
     df.to_csv(csv_path, index=False)
-
     # Keep only necessary columns
     df = df[['time', 'open', 'high', 'low', 'close', 'volume']]
     return df
@@ -104,7 +107,7 @@ def apply_technicals(df):
     
     return df_tech
 # ===================== EXECUTE =====================
-symbol = 'ETH/USDT'
+symbol = 'ETHUSDT'
 timePeriod = '1h'
 lookback = 100
 df = fetchCryptoData(symbol, timePeriod, lookback)
@@ -142,9 +145,9 @@ for index, row in df.iterrows():
             close=analyzed_df['close']
         )])
 
-        pip_value = 0.20  # 20 pips for ETH/USDT - adjust as needed
-        near_support = abs(analyzed_df['close'] - analyzed_df['support']) <= pip_value
-        near_resistance = abs(analyzed_df['close'] - analyzed_df['resistance']) <= pip_value
+        # pip_value = 0.20  # 20 pips for ETH/USDT - adjust as needed
+        # near_support = abs(analyzed_df['close'] - analyzed_df['support']) <= pip_value
+        # near_resistance = abs(analyzed_df['close'] - analyzed_df['resistance']) <= pip_value
 
         fig.add_trace(go.Scatter(
             x=analyzed_df[near_support]['time'],
