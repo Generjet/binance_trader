@@ -1,0 +1,1 @@
+- work only in crypto_chart_app

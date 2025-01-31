@@ -124,6 +124,7 @@ for index, row in df.iterrows():
     # print("analyzed data =========> ",analyzed_df)
     if len(analyzed_df) > 4:
         analyzed_df = find_extremum(analyzed_df, 4)
+    if len(analyzed_df) > 4: # call support_resistance_range after find_extremum
         analyzed_df = support_resistance_range(analyzed_df, 10)
     if len(analyzed_df) > 15:
         analyzed_df = apply_technicals(analyzed_df)
@@ -133,7 +134,14 @@ for index, row in df.iterrows():
     print("Database created")
     # update_db(row)
     latest_row = analyzed_df.iloc[-1]
+
+    # Calculate near support/resistance flags
+    pip_value = 0.20  # 20 pips for ETH/USDT - adjust as needed
+    latest_row['near_support'] = abs(latest_row['close'] - latest_row['support']) <= pip_value
+    latest_row['near_resistance'] = abs(latest_row['close'] - latest_row['resistance']) <= pip_value
+
     update_db(latest_row)
+    time.sleep(2)
     
     # Plotting logic
     if len(analyzed_df) > 5:
@@ -150,16 +158,16 @@ for index, row in df.iterrows():
         # near_resistance = abs(analyzed_df['close'] - analyzed_df['resistance']) <= pip_value
 
         fig.add_trace(go.Scatter(
-            x=analyzed_df[near_support]['time'],
-            y=analyzed_df[near_support]['close'],
+            x=analyzed_df[analyzed_df['near_support'] == True].index, # Filter near_support == True
+            y=analyzed_df.loc[analyzed_df['near_support'] == True, 'close'],
             mode='markers',
             marker=dict(color='red', size=8),
             name='Near Support (20 pips)'
         ))
 
         fig.add_trace(go.Scatter(
-            x=analyzed_df[near_resistance]['time'],
-            y=analyzed_df[near_resistance]['close'],
+            x=analyzed_df[analyzed_df['near_resistance'] == True].index, # Filter near_resistance == True
+            y=analyzed_df.loc[analyzed_df['near_resistance'] == True, 'close'],
             mode='markers',
             marker=dict(color='yellow', size=8),
             name='Near Resistance (20 pips)'
