@@ -145,7 +145,7 @@ def reversal_pattern(candle):
                 return "bearish_hanging_man"
 
     return "no"
-git 
+
 def apply_technicals(df):
     if len(df) < 14:  # Minimum required length for calculations
         return df    
@@ -170,7 +170,7 @@ def apply_technicals(df):
 # ===================== EXECUTE =====================
 symbol = 'ETHUSDT'
 timePeriod = '1h'
-lookback = 100
+lookback = 300
 df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTIL HERE ALL WORKS =============
 # Create a list to collect processed rows

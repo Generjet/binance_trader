@@ -75,7 +75,7 @@ h1 {
 #chart, #volume-chart, #macd-chart, #rsi-chart, #stochastic-chart {
     width: 90%;
     margin: 20px auto;
-    min-height: 300px;
+    min-height: 600px; /* Increased height by 2x */
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
