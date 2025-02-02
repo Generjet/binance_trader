@@ -73,6 +73,27 @@ def find_extremum(df, window=4):
     print("AFTER EXTREMUMS: ",df)
     return df
 
+# Trend reversal patterns
+    def detect_engulfing_pattern(df):
+        if len(df) < 4:
+            df['engulfing'] = 'no'
+            return df
+
+        df['engulfing'] = 'no'
+        for i in range(3, len(df)):
+            prev_candle = df.iloc[i-1]
+            current_candle = df.iloc[i]
+            prev_trend = df.iloc[i-2]['close'] - df.iloc[i-3]['close']
+            # prev_trend negative means downtrend, positive means uptrend
+
+            if is_bullish_doji(prev_candle):
+                if prev_trend < 0 and current_candle['close'] > current_candle['open'] and current_candle['close'] > prev_candle['high'] and current_candle['open'] < prev_candle['low']:
+                    df.at[i, 'engulfing'] = 'bullish'
+                elif prev_trend > 0 and current_candle['close'] < current_candle['open'] and current_candle['close'] < prev_candle['low'] and current_candle['open'] > prev_candle['high']:
+                    df.at[i, 'engulfing'] = 'bearish'
+
+        return df
+
 def is_bullish_doji(candle):
     open_price = candle['open']
     close_price = candle['close']
@@ -113,7 +134,12 @@ lookback = 100
 df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTIL HERE ALL WORKS =============
 # Create a list to collect processed rows
-analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume'])
+analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume','support', 'resistance'])
+# Add the necessary columns if they do not exist
+if 'support' not in df.columns:
+    df['support'] = np.nan
+if 'resistance' not in df.columns:
+    df['resistance'] = np.nan
 
 for index, row in df.iterrows():
     # for index, row in df.iterrows(): нь historical data-г нэг нэгээр авч байгаа simulation
@@ -173,7 +199,7 @@ for index, row in df.iterrows():
             name='Near Resistance (20 pips)'
         ))
 
-        fig.write_image("crypto_chart_app/chart.png")
+        fig.write_image("chart.png")
         print("Chart saved to crypto_chart_app/chart.png")
 
     time.sleep(2)

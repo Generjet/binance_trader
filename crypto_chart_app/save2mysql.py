@@ -29,6 +29,7 @@ class AnalyzedData(db.Model):
     stochastic_K = db.Column(db.Float)
     near_support = db.Column(db.Boolean)
     near_resistance = db.Column(db.Boolean)
+    engulfing = db.Column(db.String(255))
 
 def create_database_if_not_exists():
     # Connect to MySQL server without specifying a database
@@ -67,8 +68,15 @@ def create_database_if_not_exists():
 
 def alter_table_add_columns():
     with app.app_context():
-        db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_support BOOLEAN DEFAULT NULL"))
-        db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_resistance BOOLEAN DEFAULT NULL"))
+        inspector = inspect(db.engine)
+        columns = [column['name'] for column in inspector.get_columns('analyzed_data')]
+
+        if 'near_support' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_support BOOLEAN DEFAULT NULL"))
+        if 'near_resistance' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_resistance BOOLEAN DEFAULT NULL"))
+        if 'engulfing' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN engulfing VARCHAR(255) DEFAULT NULL"))
         db.session.commit()
         print("AnalyzedData table altered to add near_support and near_resistance columns.")
 
@@ -80,6 +88,7 @@ if __name__ == "__main__":
     else:
         create_database_if_not_exists() # Call create_database_if_not_exists for other cases
         print("Run with 'python save2mysql.py table' to update database tables.")
+
 def update_db(row):
     with app.app_context():
         # Replace NaN values with None
