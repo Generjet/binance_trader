@@ -87,10 +87,11 @@ def detect_engulfing_pattern(df):
         # prev_trend negative means downtrend, positive means uptrend
 
         doji_type = doji_check(prev_candle)
-        if doji_type == "bullish_doji":
+        reversal = reversal_pattern(prev_candle)
+        if doji_type == "bullish_doji" or reversal == "bullish_hammer" or reversal == "bullish_inverted_hammer":
             if prev_trend < 0 and current_candle['close'] > current_candle['open'] and current_candle['close'] > prev_candle['high'] and current_candle['open'] < prev_candle['low']:
                 df.at[i, 'engulfing'] = 'bullish'
-        elif doji_type == "bearish_doji":
+        elif doji_type == "bearish_doji" or reversal == "bearish_shooting_star" or reversal == "bearish_hanging_man":
             if prev_trend > 0 and current_candle['close'] < current_candle['open'] and current_candle['close'] < prev_candle['low'] and current_candle['open'] > prev_candle['high']:
                 df.at[i, 'engulfing'] = 'bearish'
 
@@ -138,7 +139,7 @@ def reversal_pattern(candle):
                 return "bearish_hanging_man"
 
     return "no"
-
+git 
 def apply_technicals(df):
     if len(df) < 14:  # Minimum required length for calculations
         return df    
