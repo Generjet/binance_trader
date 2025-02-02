@@ -30,6 +30,8 @@ class AnalyzedData(db.Model):
     near_support = db.Column(db.Boolean)
     near_resistance = db.Column(db.Boolean)
     engulfing = db.Column(db.String(255))
+    doji = db.Column(db.String(255))
+    reversal = db.Column(db.String(255))
 
 def create_database_if_not_exists():
     # Connect to MySQL server without specifying a database
@@ -77,6 +79,10 @@ def alter_table_add_columns():
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_resistance BOOLEAN DEFAULT NULL"))
         if 'engulfing' not in columns:
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN engulfing VARCHAR(255) DEFAULT NULL"))
+        if 'doji' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN doji VARCHAR(255) DEFAULT NULL"))
+        if 'reversal' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN reversal VARCHAR(255) DEFAULT NULL"))
         db.session.commit()
         print("AnalyzedData table altered to add near_support and near_resistance columns.")
 
@@ -108,8 +114,11 @@ def update_db(row):
             ema=row.get('ema', None),
             stochastic_D=row.get('stochastic-D', None),
             stochastic_K=row.get('stochastic-K', None),
-            near_support=row.get('near_support', None),       # Add near_support
-            near_resistance=row.get('near_resistance', None) # Add near_resistance
+            near_support=row.get('near_support', None),
+            near_resistance=row.get('near_resistance', None),
+            engulfing=row.get('engulfing', None),  # Add engulfing
+            doji=row.get('doji', None),            # Add doji
+            reversal=row.get('reversal', None)     # Add reversal
         )
         db.session.add(analyzed_data)
         db.session.commit()

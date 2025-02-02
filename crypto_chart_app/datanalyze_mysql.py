@@ -77,9 +77,13 @@ def find_extremum(df, window=4):
 def detect_engulfing_pattern(df):
     if len(df) < 4:
         df['engulfing'] = 'no'
+        df['reversal_pattern'] = 'no'
+        df['doji'] = 'no'
         return df
 
     df['engulfing'] = 'no'
+    df['reversal_pattern'] = 'no'
+    df['doji'] = 'no'
     for i in range(3, len(df)):
         prev_candle = df.iloc[i-1]
         current_candle = df.iloc[i]
@@ -88,6 +92,8 @@ def detect_engulfing_pattern(df):
 
         doji_type = doji_check(prev_candle)
         reversal = reversal_pattern(prev_candle)
+        df.at[i-1, 'reversal_pattern'] = reversal  # Save the reversal pattern in the DataFrame
+        df.at[i-1, 'doji'] = doji_type  # Save the doji type in the DataFrame
         if doji_type == "bullish_doji" or reversal == "bullish_hammer" or reversal == "bullish_inverted_hammer":
             if prev_trend < 0 and current_candle['close'] > current_candle['open'] and current_candle['close'] > prev_candle['high'] and current_candle['open'] < prev_candle['low']:
                 df.at[i, 'engulfing'] = 'bullish'
