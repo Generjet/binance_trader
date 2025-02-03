@@ -1,1 +1,2 @@
 - work only in crypto_chart_app
+- My mysql database has: username=root , password=Tamir4578, host=localhost, database_name=portalblog_dev
