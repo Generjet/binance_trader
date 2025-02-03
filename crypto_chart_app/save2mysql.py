@@ -27,8 +27,8 @@ class AnalyzedData(db.Model):
     ema = db.Column(db.Float)
     stochastic_D = db.Column(db.Float)
     stochastic_K = db.Column(db.Float)
-    near_support = db.Column(db.Boolean)
-    near_resistance = db.Column(db.Boolean)
+    near_support = db.Column(db.Float)
+    near_resistance = db.Column(db.Float)
     engulfing = db.Column(db.String(255))
     doji = db.Column(db.String(255))
     reversal = db.Column(db.String(255))
@@ -49,24 +49,8 @@ def create_database_if_not_exists():
     with app.app_context():
         db.create_all()
 
-    near_support = db.Column(db.Boolean)
-    near_resistance = db.Column(db.Boolean)
-
-def create_database_if_not_exists():
-    # Connect to MySQL server without specifying a database
-    connection = pymysql.connect(
-        host='localhost',
-        user='root',
-        password='Tamir4578'
-    )
-    cursor = connection.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS portalblog_dev")
-    cursor.close()
-    connection.close()
-
-    # Create tables if they do not exist
-    with app.app_context():
-        db.create_all()
+    near_support = db.Column(db.Float)
+    near_resistance = db.Column(db.Float)
 
 def alter_table_add_columns():
     with app.app_context():
@@ -74,9 +58,9 @@ def alter_table_add_columns():
         columns = [column['name'] for column in inspector.get_columns('analyzed_data')]
 
         if 'near_support' not in columns:
-            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_support BOOLEAN DEFAULT NULL"))
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_support FLOAT DEFAULT NULL"))
         if 'near_resistance' not in columns:
-            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_resistance BOOLEAN DEFAULT NULL"))
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_resistance FLOAT DEFAULT NULL"))
         if 'engulfing' not in columns:
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN engulfing VARCHAR(255) DEFAULT NULL"))
         if 'doji' not in columns:
@@ -85,15 +69,6 @@ def alter_table_add_columns():
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN reversal VARCHAR(255) DEFAULT NULL"))
         db.session.commit()
         print("AnalyzedData table altered to add near_support and near_resistance columns.")
-
-
-if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == 'table':
-        alter_table_add_columns() # Call alter_table_add_columns instead
-        print("Database table alteration attempted.")
-    else:
-        create_database_if_not_exists() # Call create_database_if_not_exists for other cases
-        print("Run with 'python save2mysql.py table' to update database tables.")
 
 def update_db(row):
     with app.app_context():
@@ -149,30 +124,14 @@ def update_db(row):
             print("Data saved for time:", row['time'])
         
         db.session.commit()
-
-# ====== OLD METHOD of saving data to MySQL without checking if data exists or not======
-# def update_db(row):
-#     with app.app_context():
-#         # Replace NaN values with None
-#         row = {key: (None if pd.isna(value) else value) for key, value in row.items()}
-        
-#         analyzed_data = AnalyzedData(
-#             time=row['time'],
-#             open=row['open'],
-#             high=row['high'],
-#             low=row['low'],
-#             close=row['close'],
-#             volume=row['volume'],
-#             resistance=row.get('resistance', None),
-#             support=row.get('support', None),
-#             macd=row.get('macd', None),
-#             rsi=row.get('rsi', None),
-#             ema=row.get('ema', None),
-#             stochastic_D=row.get('stochastic-D', None),
-#             stochastic_K=row.get('stochastic-K', None),
-#             near_support=row.get('near_support', None),       # Add near_support
-#             near_resistance=row.get('near_resistance', None) # Add near_resistance
-#         )
-#         db.session.add(analyzed_data)
-#         db.session.commit()
-#         print("Data saved for time:", row['time'])
+# ========= MAIN ================
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == 'table':
+        alter_table_add_columns() # Call alter_table_add_columns instead
+        print("Database table alteration attempted.")
+    elif len(sys.argv) > 1 and sys.argv[1] == 'data':
+        # Create database if it does not exist
+        create_database_if_not_exists()
+    else:
+        create_database_if_not_exists() # Call create_database_if_not_exists for other cases
+        print("Run with 'python save2mysql.py table' to update database tables.")

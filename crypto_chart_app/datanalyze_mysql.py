@@ -56,8 +56,8 @@ def support_resistance_range(df, price_range=10):
     # check if the current price is within the resistance range
     is_near_resistance = (df['close'] >= resistance_lower_range) & (df['close'] <= resistance_upper_range)
     # Add the new columns to the DataFrame
-    df['near_support'] = is_near_support
-    df['near_resistance'] = is_near_resistance
+    df['near_support'] = np.where(is_near_support, df['close'], np.nan)
+    df['near_resistance'] = np.where(is_near_resistance, df['close'], np.nan)
     return df
 
 def find_extremum(df, window=4):
@@ -77,12 +77,12 @@ def find_extremum(df, window=4):
 def detect_engulfing_pattern(df):
     if len(df) < 4:
         df['engulfing'] = 'no'
-        df['reversal_pattern'] = 'no'
+        df['reversal'] = 'no'
         df['doji'] = 'no'
         return df
 
     df['engulfing'] = 'no'
-    df['reversal_pattern'] = 'no'
+    df['reversal'] = 'no'
     df['doji'] = 'no'
     for i in range(3, len(df)):
         prev_candle = df.iloc[i-1]
@@ -92,7 +92,7 @@ def detect_engulfing_pattern(df):
 
         doji_type = doji_check(prev_candle)
         reversal = reversal_pattern(prev_candle)
-        df.at[i-1, 'reversal_pattern'] = reversal  # Save the reversal pattern in the DataFrame
+        df.at[i-1, 'reversal'] = reversal  # Save the reversal pattern in the DataFrame
         df.at[i-1, 'doji'] = doji_type  # Save the doji type in the DataFrame
         if doji_type == "bullish_doji" or reversal == "bullish_hammer" or reversal == "bullish_inverted_hammer":
             if prev_trend < 0 and current_candle['close'] > current_candle['open'] and current_candle['close'] > prev_candle['high'] and current_candle['open'] < prev_candle['low']:
@@ -203,44 +203,12 @@ for index, row in df.iterrows():
     latest_row = analyzed_df.iloc[-1]
 
     # Calculate near support/resistance flags
-    pip_value = 0.20  # 20 pips for ETH/USDT - adjust as needed
-    latest_row['near_support'] = abs(latest_row['close'] - latest_row['support']) <= pip_value
-    latest_row['near_resistance'] = abs(latest_row['close'] - latest_row['resistance']) <= pip_value
+    # pip_value = 10  # 20 pips for ETH/USDT - adjust as needed
+    # latest_row['near_support'] = abs(latest_row['close'] - latest_row['support']) <= pip_value
+    # latest_row['near_resistance'] = abs(latest_row['close'] - latest_row['resistance']) <= pip_value
 
     update_db(latest_row)
     time.sleep(2)
-    
-    # Plotting logic
-    if len(analyzed_df) > 5:
-        fig = go.Figure(data=[go.Candlestick(
-            x=analyzed_df['time'],
-            open=analyzed_df['open'],
-            high=analyzed_df['high'],
-            low=analyzed_df['low'],
-            close=analyzed_df['close']
-        )])
-
-        # pip_value = 0.20  # 20 pips for ETH/USDT - adjust as needed
-        # near_support = abs(analyzed_df['close'] - analyzed_df['support']) <= pip_value
-        # near_resistance = abs(analyzed_df['close'] - analyzed_df['resistance']) <= pip_value
-
-        fig.add_trace(go.Scatter(
-            x=analyzed_df[analyzed_df['near_support'] == True].index, # Filter near_support == True
-            y=analyzed_df.loc[analyzed_df['near_support'] == True, 'close'],
-            mode='markers',
-            marker=dict(color='red', size=8),
-            name='Near Support (20 pips)'
-        ))
-
-        fig.add_trace(go.Scatter(
-            x=analyzed_df[analyzed_df['near_resistance'] == True].index, # Filter near_resistance == True
-            y=analyzed_df.loc[analyzed_df['near_resistance'] == True, 'close'],
-            mode='markers',
-            marker=dict(color='yellow', size=8),
-            name='Near Resistance (20 pips)'
-        ))
-
-        fig.write_image("chart.png")
-        print("Chart saved to crypto_chart_app/chart.png")
+    print("Chart saved to crypto_chart_app/chart.png")
 
     time.sleep(2)
