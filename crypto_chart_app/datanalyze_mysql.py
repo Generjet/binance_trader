@@ -192,6 +192,7 @@ for index, row in df.iterrows():
         analyzed_df = find_extremum(analyzed_df, 4)
     if len(analyzed_df) > 4: # call support_resistance_range after find_extremum
         analyzed_df = support_resistance_range(analyzed_df, 10)
+        analyzed_df = detect_engulfing_pattern(analyzed_df)
     if len(analyzed_df) > 15:
         analyzed_df = apply_technicals(analyzed_df)
         print("\nAnalyzed data after technicals:")
