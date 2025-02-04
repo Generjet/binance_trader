@@ -238,7 +238,10 @@ for index, row in df.iterrows():
         analyzed_df = apply_technicals(analyzed_df)
         analyzed_df = trade_analyze(analyzed_df)
         print("\nAnalyzed data after technicals:")
-    print(tabulate(analyzed_df.tail(), headers='keys', tablefmt='psql', floatfmt='.4f'))
+        print("\nMACD Data:")
+        print(tabulate(analyzed_df[['time', 'macd', 'macd_signal', 'macd_hist']].tail(4), headers='keys', tablefmt='psql', floatfmt='.4f'))
+    # print(tabulate(analyzed_df.tail(), headers='keys', tablefmt='psql', floatfmt='.4f'))
+
     create_database_if_not_exists()
     print("Database created")
     # update_db(row)
