@@ -178,6 +178,7 @@ def trade_analyze(analyzed_df):
     analyzed_df['macd_trade'] = 'wait'
     analyzed_df['rsi_trade'] = 'wait'
     analyzed_df['stochastic_trade'] = 'wait'
+    analyzed_df['channel_trade'] = 'wait'
     
     # Iterate over the DataFrame to determine trade signals
     for i in range(1, len(analyzed_df)):
@@ -198,6 +199,12 @@ def trade_analyze(analyzed_df):
             analyzed_df.at[analyzed_df.index[i], 'stochastic_trade'] = 'buy'
         elif analyzed_df['stochastic-K'].iloc[i] > 80 and analyzed_df['stochastic-D'].iloc[i] > 80:
             analyzed_df.at[analyzed_df.index[i], 'stochastic_trade'] = 'sell'
+        
+        # Channel trade signals
+        if not pd.isna(analyzed_df['near_support'].iloc[i]):
+            analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'buy'
+        elif not pd.isna(analyzed_df['near_resistance'].iloc[i]):
+            analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'sell'
     
     return analyzed_df
 
@@ -229,6 +236,7 @@ for index, row in df.iterrows():
         analyzed_df = detect_engulfing_pattern(analyzed_df)
     if len(analyzed_df) > 15:
         analyzed_df = apply_technicals(analyzed_df)
+        analyzed_df = trade_analyze(analyzed_df)
         print("\nAnalyzed data after technicals:")
     print(tabulate(analyzed_df.tail(), headers='keys', tablefmt='psql', floatfmt='.4f'))
     create_database_if_not_exists()
