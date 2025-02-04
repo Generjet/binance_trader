@@ -153,6 +153,10 @@ def apply_technicals(df):
     try:
         # Calculate MACD
         df_tech['macd'] = ta.trend.macd_diff(df_tech['close'])
+        # Calculate MACD Signal
+        df_tech['macd_signal'] = ta.trend.macd_signal(df_tech['close'], window_slow=26, window_fast=12)
+        # Calculate MACD Histogram
+        df_tech['macd_hist'] = ta.trend.macd_diff(df_tech['close'], window_slow=26, window_fast=12, window_sign=9)
         # Calculate RSI
         df_tech['rsi'] = ta.momentum.rsi(df_tech['close'], window=14)
         # Calculate Stochastic Oscillator
@@ -167,6 +171,36 @@ def apply_technicals(df):
         return df
     
     return df_tech
+
+# ===================== Trade analyze functions =====================
+def trade_analyze(analyzed_df):
+    # Initialize the trade columns with 'wait'
+    analyzed_df['macd_trade'] = 'wait'
+    analyzed_df['rsi_trade'] = 'wait'
+    analyzed_df['stochastic_trade'] = 'wait'
+    
+    # Iterate over the DataFrame to determine trade signals
+    for i in range(1, len(analyzed_df)):
+        # MACD trade signals
+        if analyzed_df['macd'].iloc[i] > analyzed_df['macd_signal'].iloc[i] and analyzed_df['macd'].iloc[i-1] <= analyzed_df['macd_signal'].iloc[i-1]:
+            analyzed_df.at[analyzed_df.index[i], 'macd_trade'] = 'buy'
+        elif analyzed_df['macd'].iloc[i] < analyzed_df['macd_signal'].iloc[i] and analyzed_df['macd'].iloc[i-1] >= analyzed_df['macd_signal'].iloc[i-1]:
+            analyzed_df.at[analyzed_df.index[i], 'macd_trade'] = 'sell'
+        
+        # RSI trade signals
+        if analyzed_df['rsi'].iloc[i] < 30:
+            analyzed_df.at[analyzed_df.index[i], 'rsi_trade'] = 'buy'
+        elif analyzed_df['rsi'].iloc[i] > 70:
+            analyzed_df.at[analyzed_df.index[i], 'rsi_trade'] = 'sell'
+        
+        # Stochastic oscillator trade signals
+        if analyzed_df['stochastic-K'].iloc[i] < 20 and analyzed_df['stochastic-D'].iloc[i] < 20:
+            analyzed_df.at[analyzed_df.index[i], 'stochastic_trade'] = 'buy'
+        elif analyzed_df['stochastic-K'].iloc[i] > 80 and analyzed_df['stochastic-D'].iloc[i] > 80:
+            analyzed_df.at[analyzed_df.index[i], 'stochastic_trade'] = 'sell'
+    
+    return analyzed_df
+
 # ===================== EXECUTE =====================
 symbol = 'ETHUSDT'
 timePeriod = '4h'

@@ -23,6 +23,8 @@ class AnalyzedData(db.Model):
     resistance = db.Column(db.Float)
     support = db.Column(db.Float)
     macd = db.Column(db.Float)
+    macd_signal = db.Column(db.Float)
+    macd_hist = db.Column(db.Float)
     rsi = db.Column(db.Float)
     ema = db.Column(db.Float)
     stochastic_D = db.Column(db.Float)
@@ -56,7 +58,10 @@ def alter_table_add_columns():
     with app.app_context():
         inspector = inspect(db.engine)
         columns = [column['name'] for column in inspector.get_columns('analyzed_data')]
-
+        if 'macd_hist' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN macd_hist FLOAT DEFAULT NULL"))
+        if 'macd_signal' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN macd_signal FLOAT DEFAULT NULL"))
         if 'near_support' not in columns:
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_support FLOAT DEFAULT NULL"))
         if 'near_resistance' not in columns:
@@ -69,61 +74,64 @@ def alter_table_add_columns():
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN reversal VARCHAR(255) DEFAULT NULL"))
         db.session.commit()
         print("AnalyzedData table altered to add near_support and near_resistance columns.")
-
-def update_db(row):
-    with app.app_context():
-        # Replace NaN values with None
-        row = {key: (None if pd.isna(value) else value) for key, value in row.items()}
-        
-        # Check if a record with the same 'time' exists
-        existing_record = AnalyzedData.query.filter_by(time=row['time']).first()
-        
-        if existing_record:
-            # Update existing record
-            existing_record.open = row['open']
-            existing_record.high = row['high']
-            existing_record.low = row['low']
-            existing_record.close = row['close']
-            existing_record.volume = row['volume']
-            existing_record.resistance = row.get('resistance', None)
-            existing_record.support = row.get('support', None)
-            existing_record.macd = row.get('macd', None)
-            existing_record.rsi = row.get('rsi', None)
-            existing_record.ema = row.get('ema', None)
-            existing_record.stochastic_D = row.get('stochastic-D', None)
-            existing_record.stochastic_K = row.get('stochastic-K', None)
-            existing_record.near_support = row.get('near_support', None)
-            existing_record.near_resistance = row.get('near_resistance', None)
-            existing_record.engulfing = row.get('engulfing', None)
-            existing_record.doji = row.get('doji', None)
-            existing_record.reversal = row.get('reversal', None)
-            print("Data updated for time:", row['time'])
-        else:
-            # Create new record
-            analyzed_data = AnalyzedData(
-                time=row['time'],
-                open=row['open'],
-                high=row['high'],
-                low=row['low'],
-                close=row['close'],
-                volume=row['volume'],
-                resistance=row.get('resistance', None),
-                support=row.get('support', None),
-                macd=row.get('macd', None),
-                rsi=row.get('rsi', None),
-                ema=row.get('ema', None),
-                stochastic_D=row.get('stochastic-D', None),
-                stochastic_K=row.get('stochastic-K', None),
-                near_support=row.get('near_support', None),
-                near_resistance=row.get('near_resistance', None),
-                engulfing=row.get('engulfing', None),
-                doji=row.get('doji', None),
-                reversal=row.get('reversal', None)
-            )
-            db.session.add(analyzed_data)
-            print("Data saved for time:", row['time'])
-        
-        db.session.commit()
+        def update_db(row):
+            with app.app_context():
+                # Replace NaN values with None
+                row = {key: (None if pd.isna(value) else value) for key, value in row.items()}
+                
+                # Check if a record with the same 'time' exists
+                existing_record = AnalyzedData.query.filter_by(time=row['time']).first()
+                
+                if existing_record:
+                    # Update existing record
+                    existing_record.open = row['open']
+                    existing_record.high = row['high']
+                    existing_record.low = row['low']
+                    existing_record.close = row['close']
+                    existing_record.volume = row['volume']
+                    existing_record.resistance = row.get('resistance', None)
+                    existing_record.support = row.get('support', None)
+                    existing_record.macd = row.get('macd', None)
+                    existing_record.macd_signal = row.get('macd_signal', None)
+                    existing_record.macd_hist = row.get('macd_hist', None)
+                    existing_record.rsi = row.get('rsi', None)
+                    existing_record.ema = row.get('ema', None)
+                    existing_record.stochastic_D = row.get('stochastic-D', None)
+                    existing_record.stochastic_K = row.get('stochastic-K', None)
+                    existing_record.near_support = row.get('near_support', None)
+                    existing_record.near_resistance = row.get('near_resistance', None)
+                    existing_record.engulfing = row.get('engulfing', None)
+                    existing_record.doji = row.get('doji', None)
+                    existing_record.reversal = row.get('reversal', None)
+                    print("Data updated for time:", row['time'])
+                else:
+                    # Create new record
+                    analyzed_data = AnalyzedData(
+                        time=row['time'],
+                        open=row['open'],
+                        high=row['high'],
+                        low=row['low'],
+                        close=row['close'],
+                        volume=row['volume'],
+                        resistance=row.get('resistance', None),
+                        support=row.get('support', None),
+                        macd=row.get('macd', None),
+                        macd_signal=row.get('macd_signal', None),
+                        macd_hist=row.get('macd_hist', None),
+                        rsi=row.get('rsi', None),
+                        ema=row.get('ema', None),
+                        stochastic_D=row.get('stochastic-D', None),
+                        stochastic_K=row.get('stochastic-K', None),
+                        near_support=row.get('near_support', None),
+                        near_resistance=row.get('near_resistance', None),
+                        engulfing=row.get('engulfing', None),
+                        doji=row.get('doji', None),
+                        reversal=row.get('reversal', None)
+                    )
+                    db.session.add(analyzed_data)
+                    print("Data saved for time:", row['time'])
+                
+                db.session.commit()
 # ========= MAIN ================
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == 'table':
