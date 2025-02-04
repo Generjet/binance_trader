@@ -13,6 +13,7 @@ from tabulate import tabulate
 from save2mysql import create_database_if_not_exists, update_db, db, AnalyzedData
 
 app = Flask(__name__)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Tamir4578@localhost/portalblog_dev'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
@@ -152,11 +153,13 @@ def apply_technicals(df):
     df_tech = df.copy()
     try:
         # Calculate MACD
-        df_tech['macd'] = ta.trend.macd_diff(df_tech['close'])
-        # Calculate MACD Signal
-        df_tech['macd_signal'] = ta.trend.macd_signal(df_tech['close'], window_slow=26, window_fast=12)
-        # Calculate MACD Histogram
-        df_tech['macd_hist'] = ta.trend.macd_diff(df_tech['close'], window_slow=26, window_fast=12, window_sign=9)
+        # Calculate short and long EMA
+        short_ema = df_tech['close'].ewm(span=5, adjust=False).mean()
+        long_ema = df_tech['close'].ewm(span=9, adjust=False).mean()
+        # Calculate MACD and MACD Signal
+        df_tech['macd'] = short_ema - long_ema
+        df_tech['macd_signal'] = df_tech['macd'].ewm(span=9, adjust=False).mean()
+        df_tech['macd_hist'] = df_tech['macd'] - df_tech['macd_signal']
         # Calculate RSI
         df_tech['rsi'] = ta.momentum.rsi(df_tech['close'], window=14)
         # Calculate Stochastic Oscillator

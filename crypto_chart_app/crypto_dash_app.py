@@ -50,35 +50,89 @@ def create_candlestick_chart(df):
         open=df[open_col],
         high=df[high_col],
         low=df[low_col],
-        close=df[close_col]
+        close=df[close_col],
+        name='Candlestick'
     )
 
+    ema_line = go.Scatter(
+        x=df[timestamp_col],
+        y=df['ema'], # Assuming 'ema' column exists
+        name='EMA',
+        line=dict(color='blue')
+    )
+
+    support_line = go.Scatter(
+        x=df[timestamp_col],
+        y=df['support'], # Assuming 'support' column exists
+        name='Support',
+        line=dict(color='green', dash='dash')
+    )
+
+    resistance_line = go.Scatter(
+        x=df[timestamp_col],
+        y=df['resistance'], # Assuming 'resistance' column exists
+        name='Resistance',
+        line=dict(color='red', dash='dash')
+    )
+
+    near_support_points = go.Scatter(
+        x=df[timestamp_col],
+        y=df['near_support'], # Assuming 'near_support' column exists
+        mode='markers',
+        marker=dict(color='green', symbol='circle', size=5),
+        name='Near Support'
+    )
+
+    near_resistance_points = go.Scatter(
+        x=df[timestamp_col],
+        y=df['near_resistance'], # Assuming 'near_resistance' column exists
+        mode='markers',
+        marker=dict(color='red', symbol='circle', size=5),
+        name='Near Resistance'
+    )
+
+    # Shift x-axis to the right to show last 300 candles clearly
+    if len(df) > 300:
+        x_range = [df[timestamp_col].iloc[-300], df[timestamp_col].iloc[-1]]
+    else:
+        x_range = [df[timestamp_col].iloc[0], df[timestamp_col].iloc[-1]]
+
+
     layout = go.Layout(
-        title='Candlestick Chart',
-        xaxis=dict(title='Time'),
+        title='Candlestick Chart with EMA, Support and Resistance',
+        xaxis=dict(title='Time',
+                   range=x_range), # Set x-axis range
         yaxis=dict(title='Price')
     )
 
-    fig = go.Figure(data=[candlestick], layout=layout)
+    fig = go.Figure(data=[candlestick, ema_line, support_line, resistance_line, near_support_points, near_resistance_points], layout=layout)
     return fig
 
 def create_macd_chart(df):
     macd_line = go.Scatter(
         x=df[timestamp_col],
         y=df['macd'], # Assuming 'macd' column exists
-        name='MACD Line'
+        name='MACD Line',
+        marker_color='blue'
     )
     signal_line = go.Scatter(
         x=df[timestamp_col],
-        y=df['ema'], # Assuming 'ema' is used as signal line, or replace with actual signal line column
-        name='Signal Line'
+        y=df['macd_signal'], # Assuming 'macd_signal' column exists
+        name='Signal Line',
+        marker_color='red'
+    )
+    hist = go.Bar(
+        x=df[timestamp_col],
+        y=df['macd_hist'], # Assuming 'macd_hist' column exists
+        name='Histogram',
+        marker_color='grey'
     )
     layout = go.Layout(
         title='MACD',
-        xaxis=dict(title='Time'),
+        xaxis=dict(title='Time', showticklabels=False), # Hide x-axis labels
         yaxis=dict(title='MACD Value')
     )
-    fig = go.Figure(data=[macd_line, signal_line], layout=layout)
+    fig = go.Figure(data=[macd_line, signal_line, hist], layout=layout)
     return fig
 
 def create_rsi_chart(df):
@@ -89,7 +143,7 @@ def create_rsi_chart(df):
     )
     layout = go.Layout(
         title='RSI',
-        xaxis=dict(title='Time'),
+        xaxis=dict(title='Time', showticklabels=False), # Hide x-axis labels
         yaxis=dict(title='RSI Value'),
         yaxis_range=[0, 100]
     )
@@ -109,7 +163,7 @@ def create_stochastic_chart(df):
     )
     layout = go.Layout(
         title='Stochastic Oscillator',
-        xaxis=dict(title='Time'),
+        xaxis=dict(title='Time', showticklabels=False), # Hide x-axis labels
         yaxis=dict(title='Stochastic Value'),
         yaxis_range=[0, 100]
     )
