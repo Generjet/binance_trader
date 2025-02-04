@@ -201,7 +201,23 @@
                     legend: { font: { color: fontColor } }
                 };
 
-                Plotly.newPlot('chart', [candlestick, ema, resistance, support], layoutCandlestick);
+                const nearSupportScatter = {
+                    x: data.filter(d => d.near_support).map(d => d.time),
+                    y: data.filter(d => d.near_support).map(d => d.close),
+                    mode: 'markers',
+                    marker: { color: 'blue', size: 8 },
+                    name: 'Near Support'
+                };
+
+                const nearResistanceScatter = {
+                    x: data.filter(d => d.near_resistance).map(d => d.time),
+                    y: data.filter(d => d.near_resistance).map(d => d.close),
+                    mode: 'markers',
+                    marker: { color: 'pink', size: 8 },
+                    name: 'Near Resistance'
+                };
+
+                Plotly.newPlot('chart', [candlestick, ema, resistance, support, nearSupportScatter, nearResistanceScatter], layoutCandlestick);
                 Plotly.newPlot('volume-chart', [volume], layoutVolume);
                 Plotly.newPlot('macd-chart', [macd], layoutMACD);
                 Plotly.newPlot('rsi-chart', [rsi], layoutRSI);

@@ -169,8 +169,8 @@ def apply_technicals(df):
     return df_tech
 # ===================== EXECUTE =====================
 symbol = 'ETHUSDT'
-timePeriod = '1h'
-lookback = 300
+timePeriod = '4h'
+lookback = 90000000
 df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTIL HERE ALL WORKS =============
 # Create a list to collect processed rows
