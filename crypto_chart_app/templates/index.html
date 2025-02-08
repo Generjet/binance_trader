@@ -96,13 +96,30 @@
                     }
                 };
 
-                const macd = {
+                const macdLine = {
                     x: data.map(d => d.time),
                     y: data.map(d => d.macd),
                     type: 'scatter',
                     mode: 'lines',
-                    name: 'MACD',
+                    name: 'MACD Line',
                     line: { color: 'cyan' }
+                };
+
+                const macdSignal = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.macd_signal),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'MACD Signal',
+                    line: { color: 'red' }
+                };
+
+                const macdHist = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.macd_hist),
+                    type: 'bar',
+                    name: 'MACD Histogram',
+                    marker: { color: 'grey' }
                 };
 
                 const rsi = {
@@ -219,7 +236,7 @@
 
                 Plotly.newPlot('chart', [candlestick, ema, resistance, support, nearSupportScatter, nearResistanceScatter], layoutCandlestick);
                 Plotly.newPlot('volume-chart', [volume], layoutVolume);
-                Plotly.newPlot('macd-chart', [macd], layoutMACD);
+                Plotly.newPlot('macd-chart', [macdLine, macdSignal, macdHist], layoutMACD);
                 Plotly.newPlot('rsi-chart', [rsi], layoutRSI);
                 Plotly.newPlot('stochastic-chart', [stochasticK, stochasticD], layoutStochastic);
             }

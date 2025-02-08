@@ -116,6 +116,10 @@ def update_db(row):
             existing_record.engulfing = row.get('engulfing', None)
             existing_record.doji = row.get('doji', None)
             existing_record.reversal = row.get('reversal', None)
+            existing_record.macd_trade = row.get('macd_trade', 'wait')
+            existing_record.rsi_trade = row.get('rsi_trade', 'wait')
+            existing_record.stochastic_trade = row.get('stochastic_trade', 'wait')
+            existing_record.channel_trade = row.get('channel_trade', 'wait')
             print("Data updated for time:", row['time'])
         else:
             # Create new record
@@ -139,7 +143,11 @@ def update_db(row):
                 near_resistance=row.get('near_resistance', None),
                 engulfing=row.get('engulfing', None),
                 doji=row.get('doji', None),
-                reversal=row.get('reversal', None)
+                reversal=row.get('reversal', None),
+                macd_trade=row.get('macd_trade', 'wait'),
+                rsi_trade=row.get('rsi_trade', 'wait'),
+                stochastic_trade=row.get('stochastic_trade', 'wait'),
+                channel_trade=row.get('channel_trade', 'wait')
             )
             db.session.add(analyzed_data)
             print("Data saved for time:", row['time'])
