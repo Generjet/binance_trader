@@ -154,8 +154,8 @@ def apply_technicals(df):
     try:
         # Calculate MACD
         # Calculate short and long EMA
-        short_ema = df_tech['close'].ewm(span=5, adjust=False).mean()
-        long_ema = df_tech['close'].ewm(span=9, adjust=False).mean()
+        short_ema = df_tech['close'].ewm(span=12, adjust=False).mean()
+        long_ema = df_tech['close'].ewm(span=28, adjust=False).mean()
         # Calculate MACD and MACD Signal
         df_tech['macd'] = short_ema - long_ema
         df_tech['macd_signal'] = df_tech['macd'].ewm(span=9, adjust=False).mean()
@@ -213,7 +213,7 @@ def trade_analyze(analyzed_df):
 
 # ===================== EXECUTE =====================
 symbol = 'ETHUSDT'
-timePeriod = '4h'
+timePeriod = '1h'
 lookback = 90000000
 df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTIL HERE ALL WORKS =============
@@ -237,12 +237,12 @@ for index, row in df.iterrows():
     if len(analyzed_df) > 4: # call support_resistance_range after find_extremum
         analyzed_df = support_resistance_range(analyzed_df, 10)
         analyzed_df = detect_engulfing_pattern(analyzed_df)
-    if len(analyzed_df) > 15:
+    if len(analyzed_df) > 30:
         analyzed_df = apply_technicals(analyzed_df)
         analyzed_df = trade_analyze(analyzed_df)
         print("\nAnalyzed data after technicals:")
         print("\nMACD Data:")
-        print(tabulate(analyzed_df[['time', 'macd', 'macd_signal', 'macd_hist']].tail(4), headers='keys', tablefmt='psql', floatfmt='.4f'))
+        print(tabulate(analyzed_df[['time', 'engulfing','macd_hist', 'macd_trade', 'rsi_trade', 'stochastic_trade', 'channel_trade']].tail(4), headers='keys', tablefmt='psql', floatfmt='.4f'))
     # print(tabulate(analyzed_df.tail(), headers='keys', tablefmt='psql', floatfmt='.4f'))
 
     create_database_if_not_exists()
