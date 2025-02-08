@@ -39,11 +39,41 @@ app.layout = html.Div([
     dcc.Graph(id='macd-chart'),
     dcc.Graph(id='rsi-chart'),
     dcc.Graph(id='stochastic-chart'),
+    html.Div([
+        html.Div([
+            html.Div([
+                html.Label('Window Size:', style={'margin-right': '10px'}),
+                dcc.Input(
+                    id='window-size-input',
+                    type='number',
+                    value=100,
+                    min=50,
+                    max=1000,
+                    step=50,
+                    debounce=True,
+                    style={'width': '100px', 'margin-right': '20px'}
+                ),
+            ], style={'flex': '1', 'margin-right': '20px'}),
+            html.Div([
+                html.Label('Date Range:', style={'margin-right': '10px'}),
+                dcc.DatePickerRange(
+                    id='date-picker',
+                    start_date=pd.Timestamp.now() - pd.DateOffset(days=7),
+                    end_date=pd.Timestamp.now(),
+                    display_format='YYYY-MM-DD',
+                    style={'width': '300px'}
+                )
+            ], style={'flex': '1', 'margin-left': '20px'}),
+        ], style={'display': 'flex', 'align-items': 'center', 'margin': '10px'})
+    ]),
 ])
 
-def fetch_data_from_db():
-    df = pd.read_sql_table(table_name, db_connection)
-    df = df.sort_values(by=timestamp_col) # Ensure data is sorted by timestamp
+def fetch_data_from_db(window_size=100, start_date=None, end_date=None):
+    query = f'SELECT * FROM (SELECT * FROM {table_name} ORDER BY {timestamp_col} DESC LIMIT {window_size}) AS recent_data'
+    if start_date and end_date:
+        query = f'SELECT * FROM (SELECT * FROM {table_name} WHERE {timestamp_col} BETWEEN "{start_date}" AND "{end_date}" ORDER BY {timestamp_col} DESC LIMIT {window_size}) AS recent_data'
+    query += f' ORDER BY {timestamp_col} ASC'
+    df = pd.read_sql(query, db_connection)
     return df
 
 def create_candlestick_chart(df):
@@ -178,10 +208,13 @@ def create_stochastic_chart(df):
      dash.dependencies.Output('macd-chart', 'figure'),
      dash.dependencies.Output('rsi-chart', 'figure'),
      dash.dependencies.Output('stochastic-chart', 'figure')],
-    [dash.dependencies.Input('interval-component', 'n_intervals')]
+    [dash.dependencies.Input('interval-component', 'n_intervals'),
+     dash.dependencies.Input('window-size-input', 'value'),
+     dash.dependencies.Input('date-picker', 'start_date'),
+     dash.dependencies.Input('date-picker', 'end_date')]
 )
-def update_charts(n):
-    df = fetch_data_from_db()
+def update_charts(n, window_size, start_date, end_date):
+    df = fetch_data_from_db(window_size=window_size, start_date=start_date, end_date=end_date)
     candlestick_fig = create_candlestick_chart(df)
     macd_fig = create_macd_chart(df)
     rsi_fig = create_rsi_chart(df)

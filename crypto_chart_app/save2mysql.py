@@ -55,9 +55,6 @@ def create_database_if_not_exists():
     with app.app_context():
         db.create_all()
 
-    near_support = db.Column(db.Float)
-    near_resistance = db.Column(db.Float)
-
 def alter_table_add_columns():
     with app.app_context():
         inspector = inspect(db.engine)
