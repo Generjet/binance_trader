@@ -152,6 +152,46 @@ def create_candlestick_chart(df):
         line=dict(color='purple', dash='dash')
     )
 
+    near_bb_support_points = go.Scatter(
+        x=df[timestamp_col],
+        y=df['near_bb_support'], # Assuming 'near_bb_support' column exists
+        mode='markers',
+        marker=dict(color='red', symbol='star', size=10),
+        name='Near BB Support'
+    )
+
+    near_bb_resistance_points = go.Scatter(
+        x=df[timestamp_col],
+        y=df['near_bb_resistance'], # Assuming 'near_bb_resistance' column exists
+        mode='markers',
+        marker=dict(color='green', symbol='star', size=10),
+        name='Near BB Resistance'
+    )
+
+    # Add vertical lines for RSI trades
+    rsi_trade_lines = []
+    for i, row in df.iterrows():
+        if row['rsi_trade'] == 'sell':
+            rsi_trade_lines.append(
+                go.Scatter(
+                    x=[row[timestamp_col], row[timestamp_col]],
+                    y=[df[low_col].min(), df[high_col].max()],
+                    mode='lines',
+                    line=dict(color='green', dash='dash'),
+                    name='RSI Sell'
+                )
+            )
+        elif row['rsi_trade'] == 'buy':
+            rsi_trade_lines.append(
+                go.Scatter(
+                    x=[row[timestamp_col], row[timestamp_col]],
+                    y=[df[low_col].min(), df[high_col].max()],
+                    mode='lines',
+                    line=dict(color='red', dash='dash'),
+                    name='RSI Buy'
+                )
+            )
+
     # Shift x-axis to the right to show last 300 candles clearly
     if len(df) > 300:
         x_range = [df[timestamp_col].iloc[-300], df[timestamp_col].iloc[-1]]
@@ -166,7 +206,7 @@ def create_candlestick_chart(df):
         yaxis=dict(title='Price')
     )
 
-    fig = go.Figure(data=[candlestick, ema_line, support_line, resistance_line, near_support_points, near_resistance_points, engulfing_points, bb_upper_line, bb_middle_line, bb_lower_line], layout=layout)
+    fig = go.Figure(data=[candlestick, ema_line, support_line, resistance_line, near_support_points, near_resistance_points, engulfing_points, bb_upper_line, bb_middle_line, bb_lower_line, near_bb_support_points, near_bb_resistance_points] + rsi_trade_lines, layout=layout)
     return fig
 
 def create_macd_chart(df):

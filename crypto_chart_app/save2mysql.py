@@ -43,6 +43,8 @@ class AnalyzedData(db.Model):
     bb_lower = db.Column(db.Float)
     bb_trend = db.Column(db.String(255))
     bb_signal = db.Column(db.String(255))
+    near_bb_support = db.Column(db.Float)
+    near_bb_resistance = db.Column(db.Float)
 
 def create_database_if_not_exists():
     # Connect to MySQL server without specifying a database
@@ -96,6 +98,10 @@ def alter_table_add_columns():
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN bb_trend VARCHAR(255) DEFAULT NULL"))
         if 'bb_signal' not in columns:
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN bb_signal VARCHAR(255) DEFAULT NULL"))
+        if 'near_bb_support' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_bb_support FLOAT DEFAULT NULL"))
+        if 'near_bb_resistance' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN near_bb_resistance FLOAT DEFAULT NULL"))
         db.session.commit()
         print("AnalyzedData table altered to add Bollinger Bands columns.")
         print("AnalyzedData table altered to add near_support and near_resistance columns.")
@@ -138,6 +144,8 @@ def update_db(row):
             existing_record.bb_lower = row.get('bb_lower', None)
             existing_record.bb_trend = row.get('bb_trend', 'wait')
             existing_record.bb_signal = row.get('bb_signal', 'wait')
+            existing_record.near_bb_support = row.get('near_bb_support', None)
+            existing_record.near_bb_resistance = row.get('near_bb_resistance', None)
             print("Data updated for time:", row['time'])
         else:
             # Create new record
@@ -170,7 +178,9 @@ def update_db(row):
                 bb_middle = row.get('bb_middle', None),
                 bb_lower = row.get('bb_lower', None),
                 bb_trend = row.get('bb_trend', 'wait'),
-                bb_signal = row.get('bb_signal', 'wait')
+                bb_signal = row.get('bb_signal', 'wait'),
+                near_bb_support=row.get('near_bb_support', None),
+                near_bb_resistance=row.get('near_bb_resistance', None)
             )
             db.session.add(analyzed_data)
             print("Data saved for time:", row['time'])

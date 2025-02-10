@@ -44,26 +44,37 @@ def fetchCryptoData(symbol, timePeriod, lookback, ago='days ago UTC'):
     # Keep only necessary columns
     df = df[['time', 'open', 'high', 'low', 'close', 'volume']]
     return df
-
+# ======================== NEW Technical Analysis Functions ========================
 def support_resistance_range(df, price_range=5):
-    # Calculate resistance levels
-    resistance_upper_range = df['resistance'] + price_range
-    resistance_lower_range = df['resistance'] - price_range
-    # Calculate support levels
-    support_upper_range = df['support'] + price_range
-    support_lower_range = df['support'] - price_range
-    # check if the current price is within the support range
-    is_near_support = (df['low'] >= support_lower_range) & (df['low'] <= support_upper_range)
-    # check if the current price is within the resistance range
-    is_near_resistance = (df['high'] >= resistance_lower_range) & (df['high'] <= resistance_upper_range)
+    # # Calculate resistance levels
+    # resistance_range = abs(df['resistance'] - df['high'])
+    # # Calculate support levels
+    # support_range = abs(df['support'] - df['low'])
     # Add the new columns to the DataFrame
-    df['near_support'] = df.apply(lambda row: row['low'] if row['low'] >= row['support'] - price_range and row['low'] <= row['support'] + price_range else None, axis=1)
-    df['near_resistance'] = df.apply(lambda row: row['high'] if row['high'] >= row['resistance'] - price_range and row['high'] <= row['resistance'] + price_range else None, axis=1)
+    df['near_support'] = df.apply(lambda row: row['low'] if abs(row['support'] - row['low']) <= price_range else None, axis=1)
+    df['near_resistance'] = df.apply(lambda row: row['high'] if abs(row['resistance'] - row['high']) <= price_range else None, axis=1)
     return df
 
-def find_extremum(df, window=4):
-    resistances = df[df.high == df.high.rolling(window, center=True).max()].dropna().high
-    resistance_points = resistances.sort_values(ascending=True).tail(2)
+# ======================== OLD Technical Analysis Functions ========================
+# def support_resistance_range(df, price_range=5):
+#     # Calculate resistance levels
+#     resistance_upper_range = df['resistance'] + price_range
+#     resistance_lower_range = df['resistance'] - price_range
+#     # Calculate support levels
+#     support_upper_range = df['support'] + price_range
+#     support_lower_range = df['support'] - price_range
+#     # check if the current price is within the support range
+#     is_near_support = (df['low'] >= support_lower_range) & (df['low'] <= support_upper_range)
+#     # check if the current price is within the resistance range
+#     is_near_resistance = (df['high'] >= resistance_lower_range) & (df['high'] <= resistance_upper_range)
+#     # Add the new columns to the DataFrame
+#     df['near_support'] = df.apply(lambda row: row['low'] if row['low'] >= row['support'] - price_range and row['low'] <= row['support'] + price_range else None, axis=1)
+#     df['near_resistance'] = df.apply(lambda row: row['high'] if row['high'] >= row['resistance'] - price_range and row['high'] <= row['resistance'] + price_range else None, axis=1)
+#     return df
+
+def find_extremum(df, window=10):
+    resistances = df[(df.high.shift(1) < df.high) & (df.high.shift(-1) < df.high)].dropna().high
+    resistance_points = resistances.sort_values(ascending=False).head(2)
     
     if len(resistance_points) == 2:
         x1, x2 = resistance_points.index[0], resistance_points.index[1]
@@ -74,7 +85,9 @@ def find_extremum(df, window=4):
     else:
         df['resistance'] = np.nan
 
-    supports = df[df.low == df.low.rolling(window, center=True).min()].dropna().low
+    supports = df[(df.low == df.low.rolling(window, center=True).min()) & 
+                  (df.close.shift(1) < df.open.shift(1)) & 
+                  (df.close > df.open)].dropna().low
     support_points = supports.sort_values(ascending=True).tail(2)
     
     if len(support_points) == 2:
@@ -169,7 +182,7 @@ def reversal_pattern(candle):
 
     return "no"
 
-def boilinger_band_check(df, window=20, num_std_dev=2):
+def boilinger_band_check(df, window=20, num_std_dev=2, price_range=5):
     df['bb_middle'] = df['close'].rolling(window=window).mean()
     df['bb_std'] = df['close'].rolling(window=window).std()
     df['bb_upper'] = df['bb_middle'] + (df['bb_std'] * num_std_dev)
@@ -187,7 +200,9 @@ def boilinger_band_check(df, window=20, num_std_dev=2):
         else:
             df.at[df.index[i], 'bb_trend'] = 'sideways'
             df.at[df.index[i], 'bb_signal'] = 'wait'
-    
+    # ==== calculate near support and resistance levels of boilinger bands ====
+    df['near_bb_support'] = df.apply(lambda row: row['low'] if abs(row['bb_lower'] - row['low']) <= price_range else None, axis=1)
+    df['near_bb_resistance'] = df.apply(lambda row: row['high'] if abs(row['bb_upper'] - row['high']) <= price_range else None, axis=1)
     return df
 
 def apply_technicals(df):
@@ -210,7 +225,7 @@ def apply_technicals(df):
         df_tech['stochastic-D'] = df_tech['stochastic-K'].rolling(3).mean()
         # Calculate EMA
         df_tech['ema'] = df_tech['close'].ewm(span=14, adjust=False).mean()
-        df_tech = boilinger_band_check(df_tech)
+        df_tech = boilinger_band_check(df_tech, 20, 2, 5) # boilinger_band_check(df, window=20, num_std_dev=2, price_range=5):
         # Fill NaN values with previous values
         df_tech = df_tech.ffill()
     except Exception as e:
@@ -277,7 +292,7 @@ for index, row in df.iterrows():
     analyzed_df = analyzed_df.tail(20)
     # print("analyzed data =========> ",analyzed_df)
     if len(analyzed_df) > 4:
-        analyzed_df = find_extremum(analyzed_df, 4)
+        analyzed_df = find_extremum(analyzed_df, 20)
     if len(analyzed_df) > 4: # call support_resistance_range after find_extremum
         analyzed_df = support_resistance_range(analyzed_df, 10)
         analyzed_df = detect_engulfing_pattern(analyzed_df)
