@@ -123,6 +123,35 @@ def create_candlestick_chart(df):
         name='Near Resistance'
     )
 
+    engulfing_points = go.Scatter(
+        x=df[timestamp_col],
+        y=df['engulfing'], # Assuming 'engulfing' column exists
+        mode='markers',
+        marker=dict(color='yellow', symbol='star', size=10),
+        name='Engulfing'
+    )
+
+    bb_upper_line = go.Scatter(
+        x=df[timestamp_col],
+        y=df['bb_upper'], # Assuming 'bb_upper' column exists
+        name='BB Upper',
+        line=dict(color='purple', dash='dash')
+    )
+
+    bb_middle_line = go.Scatter(
+        x=df[timestamp_col],
+        y=df['bb_middle'], # Assuming 'bb_middle' column exists
+        name='BB Middle',
+        line=dict(color='orange', dash='dash')
+    )
+
+    bb_lower_line = go.Scatter(
+        x=df[timestamp_col],
+        y=df['bb_lower'], # Assuming 'bb_lower' column exists
+        name='BB Lower',
+        line=dict(color='purple', dash='dash')
+    )
+
     # Shift x-axis to the right to show last 300 candles clearly
     if len(df) > 300:
         x_range = [df[timestamp_col].iloc[-300], df[timestamp_col].iloc[-1]]
@@ -137,7 +166,7 @@ def create_candlestick_chart(df):
         yaxis=dict(title='Price')
     )
 
-    fig = go.Figure(data=[candlestick, ema_line, support_line, resistance_line, near_support_points, near_resistance_points], layout=layout)
+    fig = go.Figure(data=[candlestick, ema_line, support_line, resistance_line, near_support_points, near_resistance_points, engulfing_points, bb_upper_line, bb_middle_line, bb_lower_line], layout=layout)
     return fig
 
 def create_macd_chart(df):

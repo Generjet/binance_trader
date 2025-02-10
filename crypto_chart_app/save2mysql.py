@@ -38,6 +38,11 @@ class AnalyzedData(db.Model):
     rsi_trade = db.Column(db.String(255))
     stochastic_trade = db.Column(db.String(255))
     channel_trade = db.Column(db.String(255))
+    bb_upper = db.Column(db.Float)
+    bb_middle = db.Column(db.Float)
+    bb_lower = db.Column(db.Float)
+    bb_trend = db.Column(db.String(255))
+    bb_signal = db.Column(db.String(255))
 
 def create_database_if_not_exists():
     # Connect to MySQL server without specifying a database
@@ -81,7 +86,18 @@ def alter_table_add_columns():
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN doji VARCHAR(255) DEFAULT NULL"))
         if 'reversal' not in columns:
             db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN reversal VARCHAR(255) DEFAULT NULL"))
+        if 'bb_upper' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN bb_upper FLOAT DEFAULT NULL"))
+        if 'bb_middle' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN bb_middle FLOAT DEFAULT NULL"))
+        if 'bb_lower' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN bb_lower FLOAT DEFAULT NULL"))
+        if 'bb_trend' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN bb_trend VARCHAR(255) DEFAULT NULL"))
+        if 'bb_signal' not in columns:
+            db.session.execute(text("ALTER TABLE analyzed_data ADD COLUMN bb_signal VARCHAR(255) DEFAULT NULL"))
         db.session.commit()
+        print("AnalyzedData table altered to add Bollinger Bands columns.")
         print("AnalyzedData table altered to add near_support and near_resistance columns.")
 # ========= Update row ================
 def update_db(row):
@@ -117,6 +133,11 @@ def update_db(row):
             existing_record.rsi_trade = row.get('rsi_trade', 'wait')
             existing_record.stochastic_trade = row.get('stochastic_trade', 'wait')
             existing_record.channel_trade = row.get('channel_trade', 'wait')
+            existing_record.bb_upper = row.get('bb_upper', None)
+            existing_record.bb_middle = row.get('bb_middle', None)
+            existing_record.bb_lower = row.get('bb_lower', None)
+            existing_record.bb_trend = row.get('bb_trend', 'wait')
+            existing_record.bb_signal = row.get('bb_signal', 'wait')
             print("Data updated for time:", row['time'])
         else:
             # Create new record
@@ -144,7 +165,12 @@ def update_db(row):
                 macd_trade=row.get('macd_trade', 'wait'),
                 rsi_trade=row.get('rsi_trade', 'wait'),
                 stochastic_trade=row.get('stochastic_trade', 'wait'),
-                channel_trade=row.get('channel_trade', 'wait')
+                channel_trade=row.get('channel_trade', 'wait'),
+                bb_upper = row.get('bb_upper', None),
+                bb_middle = row.get('bb_middle', None),
+                bb_lower = row.get('bb_lower', None),
+                bb_trend = row.get('bb_trend', 'wait'),
+                bb_signal = row.get('bb_signal', 'wait')
             )
             db.session.add(analyzed_data)
             print("Data saved for time:", row['time'])
