@@ -201,8 +201,11 @@ def boilinger_band_check(df, window=20, num_std_dev=2, price_range=5):
             df.at[df.index[i], 'bb_trend'] = 'sideways'
             df.at[df.index[i], 'bb_signal'] = 'wait'
     # ==== calculate near support and resistance levels of boilinger bands ====
-    df['near_bb_support'] = df.apply(lambda row: row['low'] if abs(row['bb_lower'] - row['low']) <= price_range else None, axis=1)
-    df['near_bb_resistance'] = df.apply(lambda row: row['high'] if abs(row['bb_upper'] - row['high']) <= price_range else None, axis=1)
+    # df['near_bb_support'] = df.apply(lambda row: row['low'] if abs(row['bb_lower'] - row['low']) <= price_range else None, axis=1)
+    # df['near_bb_resistance'] = df.apply(lambda row: row['high'] if abs(row['bb_upper'] - row['high']) <= price_range else None, axis=1)
+    # ================= new signal ===========================
+    df['near_bb_support'] = df.apply(lambda row: row['low'] if (abs(row['bb_lower'] - row['low']) <= price_range or (row['rsi_trade'] == 'buy' and row['stochastic_trade'] == 'buy')) else None, axis=1)
+    df['near_bb_resistance'] = df.apply(lambda row: row['high'] if (abs(row['bb_upper'] - row['high']) <= price_range or (row['rsi_trade'] == 'sell' and row['stochastic_trade'] == 'sell')) else None, axis=1)
     return df
 
 def apply_technicals(df):
@@ -213,11 +216,11 @@ def apply_technicals(df):
         # Calculate MACD
         # Calculate short and long EMA
         short_ema = df_tech['close'].ewm(span=12, adjust=False).mean()
-        long_ema = df_tech['close'].ewm(span=28, adjust=False).mean()
+        long_ema = df_tech['close'].ewm(span=32, adjust=False).mean()
         # Calculate MACD and MACD Signal
-        df_tech['macd'] = short_ema - long_ema
-        df_tech['macd_signal'] = df_tech['macd'].ewm(span=9, adjust=False).mean()
-        df_tech['macd_hist'] = df_tech['macd'] - df_tech['macd_signal']
+        # df_tech['macd'] = ta.trend.macd(df_tech['close'])
+        # df_tech['macd_signal'] = ta.trend.macd_signal(df_tech['close'])
+        # df_tech['macd_hist'] = ta.trend.macd_diff(df_tech['close'])
         # Calculate RSI
         df_tech['rsi'] = ta.momentum.rsi(df_tech['close'], window=14)
         # Calculate Stochastic Oscillator
@@ -225,7 +228,7 @@ def apply_technicals(df):
         df_tech['stochastic-D'] = df_tech['stochastic-K'].rolling(3).mean()
         # Calculate EMA
         df_tech['ema'] = df_tech['close'].ewm(span=14, adjust=False).mean()
-        df_tech = boilinger_band_check(df_tech, 20, 2, 5) # boilinger_band_check(df, window=20, num_std_dev=2, price_range=5):
+        df_tech = boilinger_band_check(df_tech, 20, 2, 10) # boilinger_band_check(df, window=20, num_std_dev=2, price_range=5):
         # Fill NaN values with previous values
         df_tech = df_tech.ffill()
     except Exception as e:
@@ -244,11 +247,11 @@ def trade_analyze(analyzed_df):
     
     # Iterate over the DataFrame to determine trade signals
     for i in range(1, len(analyzed_df)):
-        # MACD trade signals
-        if analyzed_df['macd'].iloc[i] > analyzed_df['macd_signal'].iloc[i] and analyzed_df['macd'].iloc[i-1] <= analyzed_df['macd_signal'].iloc[i-1]:
-            analyzed_df.at[analyzed_df.index[i], 'macd_trade'] = 'buy'
-        elif analyzed_df['macd'].iloc[i] < analyzed_df['macd_signal'].iloc[i] and analyzed_df['macd'].iloc[i-1] >= analyzed_df['macd_signal'].iloc[i-1]:
-            analyzed_df.at[analyzed_df.index[i], 'macd_trade'] = 'sell'
+        # # MACD trade signals
+        # if analyzed_df['macd'].iloc[i] > analyzed_df['macd_signal'].iloc[i] and analyzed_df['macd'].iloc[i-1] <= analyzed_df['macd_signal'].iloc[i-1]:
+        #     analyzed_df.at[analyzed_df.index[i], 'macd_trade'] = 'buy'
+        # elif analyzed_df['macd'].iloc[i] < analyzed_df['macd_signal'].iloc[i] and analyzed_df['macd'].iloc[i-1] >= analyzed_df['macd_signal'].iloc[i-1]:
+        #     analyzed_df.at[analyzed_df.index[i], 'macd_trade'] = 'sell'
         
         # RSI trade signals
         if analyzed_df['rsi'].iloc[i] < 30:
@@ -277,12 +280,60 @@ lookback = 90000000
 df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTИЛ HERE ALL WORKS =============
 # Create a list to collect processed rows
-analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume','support', 'resistance'])
+analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume','support', 'resistance','macd','macd_signal','macd_hist','rsi','stochastic-K','stochastic-D','ema','bb_middle','bb_std','bb_upper','bb_lower','bb_trend','bb_signal','near_support','near_resistance','engulfing','reversal','doji','macd_trade','rsi_trade','stochastic_trade','channel_trade','near_bb_support','near_bb_resistance'])
 # Add the necessary columns if they do not exist
 if 'support' not in df.columns:
     df['support'] = np.nan
 if 'resistance' not in df.columns:
     df['resistance'] = np.nan
+if 'macd' not in df.columns:
+    df['macd'] = np.nan
+if 'macd_signal' not in df.columns:
+    df['macd_signal'] = np.nan
+if 'macd_hist' not in df.columns:
+    df['macd_hist'] = np.nan
+if 'rsi' not in df.columns:
+    df['rsi'] = np.nan
+if 'stochastic-K' not in df.columns:
+    df['stochastic-K'] = np.nan
+if 'stochastic-D' not in df.columns:
+    df['stochastic-D'] = np.nan
+if 'ema' not in df.columns:
+    df['ema'] = np.nan
+if 'bb_middle' not in df.columns:
+    df['bb_middle'] = np.nan
+if 'bb_std' not in df.columns:
+    df['bb_std'] = np.nan
+if 'bb_upper' not in df.columns:
+    df['bb_upper'] = np.nan
+if 'bb_lower' not in df.columns:
+    df['bb_lower'] = np.nan
+if 'bb_trend' not in df.columns:
+    df['bb_trend'] = np.nan
+if 'bb_signal' not in df.columns:
+    df['bb_signal'] = np.nan
+if 'near_support' not in df.columns:
+    df['near_support'] = np.nan
+if 'near_resistance' not in df.columns:
+    df['near_resistance'] = np.nan
+if 'engulfing' not in df.columns:
+    df['engulfing'] = 'no'
+if 'reversal' not in df.columns:
+    df['reversal'] = 'no'
+if 'doji' not in df.columns:
+    df['doji'] = 'no'
+if 'macd_trade' not in df.columns:
+    df['macd_trade'] = 'wait'
+if 'rsi_trade' not in df.columns:
+    df['rsi_trade'] = 'wait'
+if 'stochastic_trade' not in df.columns:
+    df['stochastic_trade'] = 'wait'
+if 'channel_trade' not in df.columns:
+    df['channel_trade'] = 'wait'
+if 'near_bb_support' not in df.columns:
+    df['near_bb_support'] = np.nan
+if 'near_bb_resistance' not in df.columns:
+    df['near_bb_resistance'] = np.nan
 
 for index, row in df.iterrows():
     # for index, row in df.iterrows(): нь historical data-г нэг нэгээр авч байгаа simulation
