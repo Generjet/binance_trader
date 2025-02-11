@@ -234,7 +234,41 @@
                     name: 'Near Resistance'
                 };
 
-                Plotly.newPlot('chart', [candlestick, ema, resistance, support, nearSupportScatter, nearResistanceScatter], layoutCandlestick);
+                const bbUpper = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.BB_Upper),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'BB Upper',
+                    line: { color: 'purple', dash: 'dash' }
+                };
+
+                const bbLower = {
+                    x: data.map(d => d.time),
+                    y: data.map(d => d.BB_Lower),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'BB Lower',
+                    line: { color: 'purple', dash: 'dash' }
+                };
+
+                
+                                const tradeBuy = {
+                                    x: data.filter(d => d.channel_trade === 'buy').map(d => d.time),
+                                    y: data.filter(d => d.channel_trade === 'buy').map(d => d.close),
+                                    mode: 'markers',
+                                    marker: { color: 'green', symbol: 'star', size: 15 },
+                                    name: 'Buy'
+                                };
+                
+                                const tradeSell = {
+                                    x: data.filter(d => d.channel_trade === 'sell').map(d => d.time),
+                                    y: data.filter(d => d.channel_trade === 'sell').map(d => d.close),
+                                    mode: 'markers',
+                                    marker: { color: 'red', symbol: 'star', size: 15 },
+                                    name: 'Sell'
+                                };
+                Plotly.newPlot('chart', [candlestick, ema, resistance, support, nearSupportScatter, nearResistanceScatter, bbUpper, bbLower, tradeBuy, tradeSell], layoutCandlestick);
                 Plotly.newPlot('volume-chart', [volume], layoutVolume);
                 Plotly.newPlot('macd-chart', [macdLine, macdSignal, macdHist], layoutMACD);
                 Plotly.newPlot('rsi-chart', [rsi], layoutRSI);

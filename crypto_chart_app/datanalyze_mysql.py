@@ -267,16 +267,16 @@ def trade_analyze(analyzed_df):
             analyzed_df.at[analyzed_df.index[i], 'stochastic_trade'] = 'sell'
         
         # Channel trade signals
-        if not pd.isna(analyzed_df['near_support'].iloc[i]):
-            analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'buy'
-        elif not pd.isna(analyzed_df['near_resistance'].iloc[i]):
-            analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'sell'
+        # if not pd.isna(analyzed_df['near_support'].iloc[i]):
+        #     analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'buy'
+        # elif not pd.isna(analyzed_df['near_resistance'].iloc[i]):
+        #     analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'sell'
         
         # Determine overall trade signal
         if not pd.isna(analyzed_df['near_bb_support'].iloc[i]) and analyzed_df['rsi_trade'].iloc[i] == 'buy' and analyzed_df['stochastic_trade'].iloc[i] == 'buy':
-            analyzed_df.at[analyzed_df.index[i], 'trade'] = 'buy'
+            analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'buy'
         elif not pd.isna(analyzed_df['near_bb_resistance'].iloc[i]) and analyzed_df['rsi_trade'].iloc[i] == 'sell' and analyzed_df['stochastic_trade'].iloc[i] == 'sell':
-            analyzed_df.at[analyzed_df.index[i], 'trade'] = 'sell'
+            analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'sell'
     
     return analyzed_df
 
@@ -287,7 +287,7 @@ lookback = 90000000
 df = fetchCryptoData(symbol, timePeriod, lookback)
 # ============= UNTИЛ HERE ALL WORKS =============
 # Create a list to collect processed rows
-analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume','support', 'resistance','macd','macd_signal','macd_hist','rsi','stochastic-K','stochastic-D','ema','bb_middle','bb_std','bb_upper','bb_lower','bb_trend','bb_signal','near_support','near_resistance','engulfing','reversal','doji','macd_trade','rsi_trade','stochastic_trade','channel_trade','near_bb_support','near_bb_resistance'])
+analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume','support', 'resistance','macd','macd_signal','macd_hist','rsi','stochastic-K','stochastic-D','ema','bb_middle','bb_std','bb_upper','bb_lower','bb_trend','bb_signal','near_support','near_resistance','engulfing','reversal','doji','macd_trade','rsi_trade','stochastic_trade','channel_trade','near_bb_support','near_bb_resistance', 'trade'])
 # Add the necessary columns if they do not exist
 if 'support' not in df.columns:
     df['support'] = np.nan
@@ -341,6 +341,8 @@ if 'near_bb_support' not in df.columns:
     df['near_bb_support'] = np.nan
 if 'near_bb_resistance' not in df.columns:
     df['near_bb_resistance'] = np.nan
+if 'trade' not in df.columns:
+    df['trade'] = 'wait'
 
 for index, row in df.iterrows():
     # for index, row in df.iterrows(): нь historical data-г нэг нэгээр авч байгаа simulation
