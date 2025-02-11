@@ -244,7 +244,8 @@ def trade_analyze(analyzed_df):
     analyzed_df['rsi_trade'] = 'wait'
     analyzed_df['stochastic_trade'] = 'wait'
     analyzed_df['channel_trade'] = 'wait'
-    
+    analyzed_df['trade'] = 'wait'  # Add the new 'trade' column
+
     # Iterate over the DataFrame to determine trade signals
     for i in range(1, len(analyzed_df)):
         # # MACD trade signals
@@ -270,6 +271,12 @@ def trade_analyze(analyzed_df):
             analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'buy'
         elif not pd.isna(analyzed_df['near_resistance'].iloc[i]):
             analyzed_df.at[analyzed_df.index[i], 'channel_trade'] = 'sell'
+        
+        # Determine overall trade signal
+        if not pd.isna(analyzed_df['near_bb_support'].iloc[i]) and analyzed_df['rsi_trade'].iloc[i] == 'buy' and analyzed_df['stochastic_trade'].iloc[i] == 'buy':
+            analyzed_df.at[analyzed_df.index[i], 'trade'] = 'buy'
+        elif not pd.isna(analyzed_df['near_bb_resistance'].iloc[i]) and analyzed_df['rsi_trade'].iloc[i] == 'sell' and analyzed_df['stochastic_trade'].iloc[i] == 'sell':
+            analyzed_df.at[analyzed_df.index[i], 'trade'] = 'sell'
     
     return analyzed_df
 
