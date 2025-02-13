@@ -192,6 +192,29 @@ def create_candlestick_chart(df):
                 )
             )
 
+    channel_trade_points = []
+    for i, row in df.iterrows():
+        if row['channel_trade'] == 'sell':
+            channel_trade_points.append(
+                go.Scatter(
+                    x=[row[timestamp_col]],
+                    y=[row[close_col]],
+                    mode='markers',
+                    marker=dict(color='blue', symbol='star', size=10),
+                    name='Channel Sell'
+                )
+            )
+        elif row['channel_trade'] == 'buy':
+            channel_trade_points.append(
+                go.Scatter(
+                    x=[row[timestamp_col]],
+                    y=[row[close_col]],
+                    mode='markers',
+                    marker=dict(color='purple', symbol='star', size=10),
+                    name='Channel Buy'
+                )
+            )
+
     # Shift x-axis to the right to show last 300 candles clearly
     if len(df) > 300:
         x_range = [df[timestamp_col].iloc[-300], df[timestamp_col].iloc[-1]]
@@ -206,7 +229,7 @@ def create_candlestick_chart(df):
         yaxis=dict(title='Price')
     )
 
-    fig = go.Figure(data=[candlestick, ema_line, support_line, resistance_line, near_support_points, near_resistance_points, engulfing_points, bb_upper_line, bb_middle_line, bb_lower_line, near_bb_support_points, near_bb_resistance_points] + rsi_trade_lines, layout=layout)
+    fig = go.Figure(data=[candlestick, ema_line, support_line, resistance_line, near_support_points, near_resistance_points, engulfing_points, bb_upper_line, bb_middle_line, bb_lower_line, near_bb_support_points, near_bb_resistance_points] + rsi_trade_lines + channel_trade_points, layout=layout)
     return fig
 
 def create_macd_chart(df):

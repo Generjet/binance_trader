@@ -19,7 +19,7 @@ app.layout = html.Div([
         page_size=PAGE_SIZE,
         page_action='custom'
     ),
-    dcc.Interval(id='interval-component', interval=1*1000, n_intervals=0)
+    dcc.Interval(id='interval-component', interval=2*1000, n_intervals=0)
 ])
 
 def calculate_bollinger_bands(df, window=20, num_std_dev=2):
