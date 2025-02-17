@@ -33,18 +33,18 @@ def get_support_resistance(df, candle_groupow=20):
 def find_extremum(df, backcandles=30,candle_group=5):
     backcandles= 30
     candle_group = 5
-    candleid = 400
+    candleid = 999
 
     maxim = np.array([])
     minim = np.array([])
     xxmin = np.array([])
     xxmax = np.array([])
 
-    for i in range(0, len(df), candle_group):
+    # for i in range(0, len(df), candle_group):
+    for i in range(candleid-backcandles, candleid+1, candle_group):
         minim = np.append(minim, df.low.iloc[i:i+candle_group].min())
         xxmin = np.append(xxmin, df.low.iloc[i:i+candle_group].idxmin())
-    # for i in range(candleid-backcandles, candleid+1, candle_group):
-    for i in range(0, len(df), candle_group):
+    for i in range(candleid-backcandles, candleid+1, candle_group):
         maxim = np.append(maxim, df.high.loc[i:i+candle_group].max())
         xxmax = np.append(xxmax, df.high.iloc[i:i+candle_group].idxmax())
     slmin, intercmin = np.polyfit(xxmin, minim,1)

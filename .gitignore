@@ -13,3 +13,7 @@ env/bin/python3
 env/bin/python3.9
 .aider*
 crypto-trading-system/node_modules/*
+crypto_chart_app/utils/__pycache__/apply_technicals.cpython-312.pyc
+crypto_chart_app/utils/__pycache__/candle_patterns.cpython-312.pyc
+crypto_chart_app/utils/__pycache__/price_channels.cpython-312.pyc
+crypto_chart_app/utils/__pycache__/*
