@@ -5,6 +5,7 @@ def apply_technicals(df):
     if len(df) < 14:  # Minimum required length for calculations
         return df    
     df_tech = df.copy()
+    df_tech = df_tech.tail(200)
     try:
         # Calculate MACD
         # Calculate short and long EMA
@@ -21,9 +22,6 @@ def apply_technicals(df):
         df_tech['stochastic-D'] = df_tech['stochastic-K'].rolling(3).mean()
         # Calculate EMA
         df_tech['ema'] = df_tech['close'].ewm(span=14, adjust=False).mean()
-        df_tech = boilinger_band_check(df_tech, 20, 2, 10) # boilinger_band_check(df, window=20, num_std_dev=2, price_range=5):
-        # Fill NaN values with previous values
-        df_tech = df_tech.ffill()
     except Exception as e:
         print(f"Error in technical analysis: {e}")
         return df
