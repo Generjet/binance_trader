@@ -110,6 +110,38 @@ def alter_table_add_columns():
         print("AnalyzedData table altered to add near_support and near_resistance columns.")
         print("AnalyzedData table altered to add trade column.")
 
+# =========== Read data from database ==============
+def fetch_data_from_db(window_size=200, start_date=None, end_date=None):
+    # Database credentials
+    db_config = {
+        'host': 'localhost',
+        'user': 'root',
+        'password': 'Tamir4578',
+        'database': 'portalblog_dev'
+    }
+
+    table_name = 'analyzed_data'
+    timestamp_col = 'time'
+    open_col = 'open'
+    high_col = 'high'
+    low_col = 'low'
+    close_col = 'close'
+
+    # Create database connection string
+    db_connection_str = 'mysql+pymysql://{user}:{password}@{host}/{database}'.format(**db_config)
+    db_connection = create_engine(db_connection_str)
+    query = f'SELECT * FROM (SELECT * FROM {table_name} ORDER BY {timestamp_col} DESC LIMIT {window_size}) AS recent_data'
+    if start_date and end_date:
+        query = f'SELECT * FROM (SELECT * FROM {table_name} WHERE {timestamp_col} BETWEEN "{start_date}" AND "{end_date}" ORDER BY {timestamp_col} DESC LIMIT {window_size}) AS recent_data'
+    query += f' ORDER BY {timestamp_col} ASC'
+    df = pd.read_sql(query, db_connection)
+    # Convert the 'time' column to datetime
+    df['time'] = pd.to_datetime(df['time'])
+
+    # Set the 'time' column as the index
+    df.set_index('time', inplace=True)
+    return df
+
 # ========= Update row ================
 def update_db(row):
     with app.app_context():

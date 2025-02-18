@@ -33,7 +33,7 @@ def get_support_resistance(df, candle_groupow=20):
 def find_extremum(df, backcandles=30,candle_group=5):
     backcandles= 30
     candle_group = 5
-    candleid = 999
+    candleid = len(df)-1
 
     maxim = np.array([])
     minim = np.array([])
