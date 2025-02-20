@@ -26,6 +26,7 @@ from utils.save2mysql import update_db
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
+import plotly.graph_objects as go
 
 # Analyzing
 analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume','support', 'resistance','macd','macd_signal','macd_hist','rsi','stochastic-K','stochastic-D','ema','bb_middle','bb_std','bb_upper','bb_lower','bb_trend','bb_signal','near_support','near_resistance','engulfing','reversal','doji','macd_trade','rsi_trade','stochastic_trade','channel_trade','near_bb_support','near_bb_resistance', 'trade'])
@@ -135,3 +136,44 @@ def fetch_data_from_db(window_size=100, start_date=None, end_date=None):
 # ========== get data section ===================
 df = fetch_data_from_db(window_size=200)
 print('Data from DB -> : ', df.head(5))
+print('==================== NEW DATA FROM DB =========================')
+
+# ========== CALCULATE SUPPORT AND RESISTANCE ==========================
+def find_extremum(df, backcandles=50, candle_group=10):
+    if df.index.name == 'time':
+        df = df.reset_index().set_index('id')  # Reset index and set 'id' as the index
+    candleid = len(df) - 1
+    print("candle_id ", candleid)
+    maxim = np.array([])
+    minim = np.array([])
+    xxmin = np.array([])
+    xxmax = np.array([])
+
+    for i in range(candleid - backcandles, candleid + 1, candle_group):
+        minim = np.append(minim, df.low.iloc[i:i + candle_group].min())
+        xxmin = np.append(xxmin, df.low.iloc[i:i + candle_group].idxmin())
+    for i in range(candleid - backcandles, candleid + 1, candle_group):
+        maxim = np.append(maxim, df.high.iloc[i:i + candle_group].max())
+        xxmax = np.append(xxmax, df.high.iloc[i:i + candle_group].idxmax())
+    slmin, intercmin = np.polyfit(xxmin, minim, 1)
+    slmax, intercmax = np.polyfit(xxmax, maxim, 1)
+    mink = df.low.iloc[candleid-backcandles:len(df)].min()
+    sm = slmin*df.low.iloc[candleid-backcandles:candleid].idxmin()
+    print("sm", sm)
+    print("mink ", mink)
+    adjintercmin = df.low.iloc[candleid-backcandles:candleid].min() - slmin*df.low.iloc[candleid-backcandles:candleid].idxmin()
+    adjintercmax = df.high.iloc[candleid-backcandles:candleid].max() - slmax*df.high.iloc[candleid-backcandles:candleid].idxmax()
+    # adjintercmin = df.low.loc[candleid - backcandles:candleid].min() - slmin * df.low.iloc[candleid - backcandles:candleid].idxmin()
+    # adjintercmax = df.high.loc[candleid - backcandles:candleid].max() - slmax * df.high.iloc[candleid - backcandles:candleid].idxmax()
+    # df.assign(support=slmin * df.index + adjintercmin, resistance=slmax * df.index + adjintercmax)
+    miny=slmin*xxmin + adjintercmin
+    maxy=slmax*xxmax + adjintercmax
+    return intercmin, intercmax,minim, maxim, xxmin, xxmax, slmin, slmax, adjintercmin, adjintercmax, miny, maxy
+
+# ====== calculate support and resistance levels ======
+intercmin, intercmax, minim, maxim, xxmin, xxmax, slmin, slmax, adjintercmin, adjintercmax, miny, maxy = find_extremum(df, 30, 5)
+print(slmax)
+# dfpl = df[1:len(df)-1]
+
+support=slmin*xxmin + adjintercmin
+resistance=slmax*xxmax + adjintercmax
