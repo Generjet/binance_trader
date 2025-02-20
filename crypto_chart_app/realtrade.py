@@ -4,10 +4,14 @@
 
 # Data fetching
 from utils.get_data import fetchCryptoData
+import os
+import time
+import sys
+from tabulate import tabulate
 
 symbol = 'ETHUSDT'
 timePeriod = '1h'
-lookback = 90000000
+lookback = 200
 df = fetchCryptoData(symbol, timePeriod, lookback)
 print(df.tail())
 
@@ -16,6 +20,9 @@ from utils.candle_patterns import detect_engulfing_pattern
 from utils.price_channels import find_extremum
 from utils.price_channels import support_resistance_range
 from utils.trade_analyze import trade_analyze
+from utils.boilinger_band import boilinger_band_check
+from utils.save2mysql import create_database_if_not_exists
+from utils.save2mysql import update_db
 import pandas as pd
 import numpy as np
 
@@ -76,36 +83,22 @@ if 'near_bb_resistance' not in df.columns:
     df['near_bb_resistance'] = np.nan
 if 'trade' not in df.columns:
     df['trade'] = 'wait'
-
+# === create database if not exists ===
+create_database_if_not_exists()
+print("Database created")
 for index, row in df.iterrows():
     # for index, row in df.iterrows(): нь historical data-г нэг нэгээр авч байгаа simulation
-    # Эндээс эхлээд анализ хийж шалгах
-    # ХАМГИЙН СҮҮЛЧИЙН 20 МЭДЭЭЛЭЛ -> analyzed_df = df.tail(20)
     analyzed_df = df.iloc[0:index+1].copy()
-    analyzed_df = analyzed_df.tail(20)
-    # print("analyzed data =========> ",analyzed_df)
 
     if len(analyzed_df) > 4: # call support_resistance_range after find_extremum
-        analyzed_df = support_resistance_range(analyzed_df, 10)
+        # analyzed_df = support_resistance_range(analyzed_df, 10)
         analyzed_df = detect_engulfing_pattern(analyzed_df)
-    if len(analyzed_df) > 50:
-        find_extremum(analyzed_df, 20)
+    if len(analyzed_df) > 20:
         analyzed_df = apply_technicals(analyzed_df)
-        analyzed_df = trade_analyze(analyzed_df)
-        print("\nAnalyzed data after technicals:")
-        print("\nMACD Data:")
+        analyzed_df = boilinger_band_check(analyzed_df,20, 2, 10)
         # print(tabulate(analyzed_df[['time', 'engulfing','macd_hist', 'macd_trade', 'rsi_trade', 'stochastic_trade', 'channel_trade', 'bb_trend', 'bb_signal']].tail(4), headers='keys', tablefmt='psql', floatfmt='.4f'))
-    # print(tabulate(analyzed_df.tail(), headers='keys', tablefmt='psql', floatfmt='.4f'))
-
-    # create_database_if_not_exists()
-    # print("Database created")
-    # # update_db(row)
-    # latest_row = analyzed_df.iloc[-1]
-
-    # update_db(latest_row)
-    # time.sleep(2)
-    # print("Chart saved to crypto_chart_app/chart.png")
-
-    # time.sleep(2)
+    update_db(row)
+    latest_row = analyzed_df.iloc[-1]
+    update_db(latest_row)
 print("Analysis completed")
 print(analyzed_df.tail(10))
