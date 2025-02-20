@@ -25,6 +25,7 @@ from utils.save2mysql import create_database_if_not_exists
 from utils.save2mysql import update_db
 import pandas as pd
 import numpy as np
+from sqlalchemy import create_engine
 
 # Analyzing
 analyzed_df = pd.DataFrame(columns=['time', 'open', 'high', 'low', 'close', 'volume','support', 'resistance','macd','macd_signal','macd_hist','rsi','stochastic-K','stochastic-D','ema','bb_middle','bb_std','bb_upper','bb_lower','bb_trend','bb_signal','near_support','near_resistance','engulfing','reversal','doji','macd_trade','rsi_trade','stochastic_trade','channel_trade','near_bb_support','near_bb_resistance', 'trade'])
@@ -102,3 +103,35 @@ for index, row in df.iterrows():
     update_db(latest_row)
 print("Analysis completed")
 print(analyzed_df.tail(10))
+print("Analysis completed!================ success!")
+# ======== READ from DB newly updated data ===================
+# Database credentials
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'Tamir4578',
+    'database': 'portalblog_dev'
+}
+
+table_name = 'analyzed_data'
+timestamp_col = 'time'
+open_col = 'open'
+high_col = 'high'
+low_col = 'low'
+close_col = 'close'
+
+# Create database connection string
+db_connection_str = 'mysql+pymysql://{user}:{password}@{host}/{database}'.format(**db_config)
+db_connection = create_engine(db_connection_str)
+
+def fetch_data_from_db(window_size=100, start_date=None, end_date=None):
+    query = f'SELECT * FROM (SELECT * FROM {table_name} ORDER BY {timestamp_col} DESC LIMIT {window_size}) AS recent_data'
+    if start_date and end_date:
+        query = f'SELECT * FROM (SELECT * FROM {table_name} WHERE {timestamp_col} BETWEEN "{start_date}" AND "{end_date}" ORDER BY {timestamp_col} DESC LIMIT {window_size}) AS recent_data'
+    query += f' ORDER BY {timestamp_col} ASC'
+    df = pd.read_sql(query, db_connection)
+    return df
+
+# ========== get data section ===================
+df = fetch_data_from_db(window_size=200)
+print('Data from DB -> : ', df.head(5))
