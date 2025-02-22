@@ -8,7 +8,7 @@ import pandas as pd
 import sys
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Tamir4578@localhost/portalblog_dev'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://tamir:Tamir4578@localhost/mydatabase'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -51,11 +51,11 @@ def create_database_if_not_exists():
     # Connect to MySQL server without specifying a database
     connection = pymysql.connect(
         host='localhost',
-        user='root',
+        user='tamir',
         password='Tamir4578'
     )
     cursor = connection.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS portalblog_dev")
+    cursor.execute("CREATE DATABASE IF NOT EXISTS mydatabase")
     cursor.close()
     connection.close()
 

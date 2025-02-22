@@ -109,9 +109,9 @@ print("Analysis completed!================ success!")
 # Database credentials
 db_config = {
     'host': 'localhost',
-    'user': 'root',
+    'user': 'tamir',
     'password': 'Tamir4578',
-    'database': 'portalblog_dev'
+    'database': 'mydatabase'
 }
 
 table_name = 'analyzed_data'
