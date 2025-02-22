@@ -1,0 +1,7 @@
+docker run -p 3306:3306 \
+    -v mysql_data:/var/lib/mysql \  # Mount the volume
+    -e MYSQL_ROOT_PASSWORD=MyStrongRootPassword \
+    -e MYSQL_USER=tamir \
+    -e MYSQL_PASSWORD=Tamir4578 \
+    -e MYSQL_DATABASE=mydatabase \
+    -d mysql:8.0

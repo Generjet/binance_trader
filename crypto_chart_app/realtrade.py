@@ -177,3 +177,5 @@ print(slmax)
 
 support=slmin*xxmin + adjintercmin
 resistance=slmax*xxmax + adjintercmax
+print('support:', support)
+print('resistance',resistance)
