@@ -17,3 +17,5 @@ crypto_chart_app/utils/__pycache__/apply_technicals.cpython-312.pyc
 crypto_chart_app/utils/__pycache__/candle_patterns.cpython-312.pyc
 crypto_chart_app/utils/__pycache__/price_channels.cpython-312.pyc
 crypto_chart_app/utils/__pycache__/*
+crypto_chart_app/__pycache__/save2mysql.cpython-312.pyc
+crypto_chart_app/__pycache__/*
