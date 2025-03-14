@@ -4,6 +4,8 @@
 4. Шинээр data table column нэмэх бол save2mysql.py дотор шинэчилж бичнэ:
 PS C:\Users\DELL\Documents\binanco\binance_trader\crypto_chart_app> python .\save2mysql.py table
 гэж ажилуулна. Аргумент table нь table column-уудыг дахин үүсгэх функцийг дуудна.
+Automating trade and becoming rich :)
+
 
 def alter_table_add_columns():
     with app.app_context():
