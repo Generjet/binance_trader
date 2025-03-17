@@ -21,3 +21,4 @@ if __name__ == "__main__":
     else:
         create_database_if_not_exists() # Call create_database_if_not_exists for other cases
         print("Run with 'python save2mysql.py table' to update database tables.")
+        # == AIzaSyDLa9KzZnAd1C8DoBHqP29uVUxR_jlN1jQ88
